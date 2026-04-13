@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Inventory & Billing</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- Auth Section -->
+    <section id="auth-section" class="auth-wrapper">
+        <div class="auth-card glass-panel" id="login-card">
+            <div class="text-end mb-2"><button
+                    class="btn btn-sm btn-outline-dark rounded-pill lang-toggle-btn">A/अ</button></div>
+            <h2 class="text-center mb-4 fw-bold gradient-text" data-i18n="welcome_back">Welcome Back</h2>
+            <form id="login-form">
+                <div class="mb-3">
+                    <label class="form-label" data-i18n="email_addr">Email Address</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                        <input type="email" id="login-email" class="form-control" placeholder="admin@shop.com" required>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label" data-i18n="password">Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                        <input type="password" id="login-password" class="form-control" placeholder="••••••••" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary w-100 btn-lg mb-3 custom-btn" data-i18n="login_btn">Login
+                    to Dashboard</button>
+                <p class="text-center text-muted"><span data-i18n="no_account">Don't have an account?</span> <a href="#"
+                        id="show-signup" class="text-primary fw-semibold" data-i18n="sign_up">Sign Up</a></p>
+            </form>
+        </div>
+
+        <div class="auth-card glass-panel d-none" id="signup-card">
+            <div class="text-end mb-2"><button
+                    class="btn btn-sm btn-outline-dark rounded-pill lang-toggle-btn">A/अ</button></div>
+            <h2 class="text-center mb-4 fw-bold gradient-text" data-i18n="create_account">Create Account</h2>
+            <form id="signup-form">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" data-i18n="full_name">Full Name</label>
+                        <input type="text" id="signup-name" class="form-control" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" data-i18n="shop_name">Shop Name</label>
+                        <input type="text" id="signup-shop" class="form-control" required>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" data-i18n="mobile_number">Mobile Number</label>
+                    <input type="tel" id="signup-mobile" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" data-i18n="email_addr">Email Address</label>
+                    <input type="email" id="signup-email" class="form-control" required>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label" data-i18n="password">Password</label>
+                    <input type="password" id="signup-password" class="form-control" required>
+                </div>
+                <div class="mb-4 text-center">
+                    <label class="form-label text-start w-100" data-i18n="upload_qr">Upload Payment QR Code
+                        (Optional)</label>
+                    <input type="file" id="signup-qr" class="form-control mb-2" accept="image/*">
+                    <img id="signup-qr-preview" class="img-fluid rounded border d-none" style="max-height: 120px;">
+                </div>
+                <button type="submit" class="btn btn-primary w-100 btn-lg mb-3 custom-btn"
+                    data-i18n="complete_signup">Complete Signup</button>
+                <p class="text-center text-muted"><span data-i18n="have_account">Already have an account?</span> <a
+                        href="#" id="show-login" class="text-primary fw-semibold" data-i18n="login">Login</a></p>
+            </form>
+        </div>
+    </section>
+
+    <!-- App Section -->
+    <section id="app-section" class="d-none">
+
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar glass-nav">
+            <div class="sidebar-header">
+                <i class="fas fa-cube logo-icon gradient-text"></i>
+                <h4 class="fw-bold m-0 gradient-text" id="display-shop-name">ShopApp</h4>
+            </div>
+            <ul class="nav flex-column sidebar-nav mt-4">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#" data-target="dashboard">
+                        <i class="fas fa-home"></i> <span data-i18n="dashboard">Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-target="products">
+                        <i class="fas fa-box-open"></i> <span data-i18n="products">Products</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-target="billing">
+                        <i class="fas fa-file-invoice-dollar"></i> <span data-i18n="billing">Billing</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-target="udhaar">
+                        <i class="fas fa-book"></i> <span data-i18n="udhaar_book">Udhaar Book</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-target="analytics">
+                        <i class="fas fa-chart-pie"></i> <span data-i18n="analytics">Analytics</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-target="profile">
+                        <i class="fas fa-user-cog"></i> <span data-i18n="edit_profile">Edit Profile</span>
+                    </a>
+                </li>
+            </ul>
+            <div class="mt-auto p-3 w-100">
+                <button id="logout-btn" class="btn btn-outline-danger w-100">
+                    <i class="fas fa-sign-out-alt"></i> <span data-i18n="logout">Logout</span>
+                </button>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+
+            <!-- Navbar -->
+            <header class="top-nav d-flex justify-content-between align-items-center mb-4">
+                <h3 class="page-title m-0 fw-bold" id="page-title" data-i18n="dashboard">Dashboard</h3>
+                <div class="user-profile d-flex align-items-center gap-3">
+                    <button class="btn btn-sm btn-outline-dark rounded-pill px-3 lang-toggle-btn">EN / हिंदी</button>
+                    <span class="welcome-text text-muted"><span data-i18n="welcome">Welcome,</span> <strong
+                            id="display-user-name" class="text-dark">User</strong></span>
+                    <div class="avatar"><i class="fas fa-user"></i></div>
+                </div>
+            </header>
+
+            <!-- Views Container -->
+            <div id="views-container">
+
+                <!-- Dashboard View -->
+                <div id="view-dashboard" class="app-view active">
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-3">
+                            <div class="stat-card p-4 glass-panel gradient-card-1">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <p class="text-white-50 mb-1" data-i18n="total_sales">Total Sales</p>
+                                        <h3 class="text-white fw-bold mb-0">₹<span id="stat-sales">0</span></h3>
+                                    </div>
+                                    <div class="stat-icon bg-white bg-opacity-25 rounded p-2">
+                                        <i class="fas fa-wallet text-white fs-4"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card p-4 glass-panel gradient-card-2">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <p class="text-white-50 mb-1" data-i18n="total_profit">Total Profit</p>
+                                        <h3 class="text-white fw-bold mb-0">₹<span id="stat-profit">0</span></h3>
+                                    </div>
+                                    <div class="stat-icon bg-white bg-opacity-25 rounded p-2">
+                                        <i class="fas fa-chart-line text-white fs-4"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card p-4 glass-panel gradient-card-3">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <p class="text-white-50 mb-1" data-i18n="top_product">Top Product</p>
+                                        <h4 class="text-white fw-bold mb-0 text-truncate" style="max-width: 120px;"
+                                            id="stat-top-product">-</h4>
+                                    </div>
+                                    <div class="stat-icon bg-white bg-opacity-25 rounded p-2">
+                                        <i class="fas fa-trophy text-white fs-4"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card p-4 glass-panel gradient-card-4">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <p class="text-white-50 mb-1" data-i18n="total_products">Total Products</p>
+                                        <h3 class="text-white fw-bold mb-0" id="stat-total-products">0</h3>
+                                    </div>
+                                    <div class="stat-icon bg-white bg-opacity-25 rounded p-2">
+                                        <i class="fas fa-boxes text-white fs-4"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-4 mt-1">
+                        <div class="col-md-6">
+                            <div class="card border-0 shadow-sm rounded-4 h-100">
+                                <div class="card-header bg-white border-0 pt-4 pb-2">
+                                    <h5 class="fw-bold text-danger m-0"><i class="fas fa-exclamation-triangle"></i>
+                                        <span data-i18n="low_stock">Low Stock Alerts</span>
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="list-group list-group-flush" id="low-stock-list">
+                                        <!-- Javascript populates -->
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border-0 shadow-sm rounded-4 h-100">
+                                <div class="card-header bg-white border-0 pt-4 pb-2">
+                                    <h5 class="fw-bold text-warning m-0"><i class="fas fa-clock"></i> <span
+                                            data-i18n="expiring">Expiring Soon</span></h5>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="list-group list-group-flush" id="expiry-alert-list">
+                                        <!-- Javascript populates -->
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="card border-0 shadow-sm rounded-4">
+                                <div class="card-header bg-white border-0 pt-4 pb-2">
+                                    <h5 class="fw-bold m-0"><i class="fas fa-book-open text-primary"></i> <span
+                                            data-i18n="udhaar_book">Udhaar Book Reminders</span></h5>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="list-group list-group-flush gap-2" id="udhaar-reminder-list">
+                                        <!-- Javascript populates -->
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Products View -->
+                <div id="view-products" class="app-view d-none">
+                    <div class="d-flex justify-content-between align-items-center mb-4 gap-3 flex-wrap">
+                        <h4 class="fw-bold m-0 text-nowrap" data-i18n="inventory_manage">Inventory Manage</h4>
+                        <div class="d-flex gap-2 flex-grow-1" style="max-width: 500px;">
+                            <div class="input-group search-group shadow-sm w-100">
+                                <span class="input-group-text bg-white border-0"><i
+                                        class="fas fa-search text-muted"></i></span>
+                                <input type="text" id="inventory-search" class="form-control border-0"
+                                    data-i18n-ph="search_items" placeholder="Search items...">
+                            </div>
+                            <select id="rack-filter" class="form-select shadow-sm border-0" style="width: 140px;">
+                                <option value="all" data-i18n="all_racks">All Racks</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-dark text-nowrap" data-bs-toggle="modal"
+                            data-bs-target="#addProductModal">
+                            <i class="fas fa-plus"></i> <span data-i18n="add_new_product">Add New Product</span>
+                        </button>
+                    </div>
+
+                    <div class="card border-0 shadow-sm rounded-4">
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle custom-table mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th data-i18n="product_name">Product Name</th>
+                                            <th data-i18n="purchase_selling">Purchase / Selling (₹)</th>
+                                            <th data-i18n="total_stock">Total Stock</th>
+                                            <th data-i18n="batches">Batches</th>
+                                            <th class="text-end" data-i18n="quick_actions">Quick Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="product-list-body">
+                                        <!-- Products populated via JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Billing View -->
+                <div id="view-billing" class="app-view d-none">
+                    <div class="row g-4">
+                        <div class="col-lg-7">
+                            <div class="card border-0 shadow-sm rounded-4 h-100">
+                                <div class="card-body p-4">
+                                    <h5 class="fw-bold mb-3" data-i18n="add_to_cart">Add to Cart</h5>
+                                    <div class="input-group mb-4 search-group shadow-sm">
+                                        <span class="input-group-text bg-white border-0"><i
+                                                class="fas fa-search text-muted"></i></span>
+                                        <input type="text" id="billing-search" class="form-control border-0"
+                                            data-i18n-ph="search_product" placeholder="Search by product name...">
+                                    </div>
+                                    <div class="billing-product-grid" id="billing-products-grid">
+                                        <!-- Products available to add -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-5">
+                            <div class="card border-0 shadow-sm rounded-4 h-100 bg-light-soft">
+                                <div class="card-body p-4 d-flex flex-column">
+                                    <h5 class="fw-bold mb-3" data-i18n="current_cart">Current Cart</h5>
+
+                                    <div class="cart-items flex-grow-1 overflow-auto" id="cart-items-container"
+                                        style="max-height: 40vh;">
+                                        <!-- Cart items -->
+                                    </div>
+
+                                    <div class="cart-summary mt-4 pt-3 border-top">
+                                        <div class="row gx-2 mb-3">
+                                            <div class="col-6">
+                                                <label class="form-label small text-muted mb-1"
+                                                    data-i18n="enter_name">Customer Name</label>
+                                                <input type="text" id="customer-name"
+                                                    class="form-control form-control-sm" placeholder="Ramesh">
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="form-label small text-muted mb-1"
+                                                    data-i18n="cust_mobile">Customer Mobile</label>
+                                                <input type="tel" id="customer-mobile"
+                                                    class="form-control form-control-sm" placeholder="e.g. 9876543210">
+                                            </div>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span class="text-muted" data-i18n="subtotal">Subtotal</span>
+                                            <span class="fw-semibold">₹<span id="cart-subtotal">0.00</span></span>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-3 fs-4 fw-bold">
+                                            <span data-i18n="total_sp">Total (Selling Price)</span>
+                                            <span class="text-primary">₹<span id="cart-total">0.00</span></span>
+                                        </div>
+
+                                        <div class="payment-methods d-flex gap-2 mb-3">
+                                            <button
+                                                class="btn btn-outline-success flex-grow-1 py-3 border-2 payment-btn"
+                                                data-method="cash">
+                                                <i class="fas fa-money-bill-wave d-block fs-3 mb-1"></i> <span
+                                                    data-i18n="cash">Cash</span>
+                                            </button>
+                                            <button
+                                                class="btn btn-outline-primary flex-grow-1 py-3 border-2 payment-btn"
+                                                data-method="online" data-bs-toggle="modal"
+                                                data-bs-target="#paymentModal">
+                                                <i class="fas fa-qrcode d-block fs-3 mb-1"></i> <span
+                                                    data-i18n="online">Online</span>
+                                            </button>
+                                            <button
+                                                class="btn btn-outline-warning flex-grow-1 py-3 border-2 payment-btn"
+                                                data-method="udhaar">
+                                                <i class="fas fa-book d-block fs-3 mb-1"></i> <span
+                                                    data-i18n="udhaar_btn">Udhaar</span>
+                                            </button>
+                                        </div>
+                                        <button class="btn btn-dark w-100 btn-lg custom-btn" id="checkout-btn" disabled
+                                            data-i18n="complete_checkout">Complete Checkout</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analytics View -->
+                <div id="view-analytics" class="app-view d-none">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+                                <h5 class="fw-bold mb-4" data-i18n="most_sold">Most Sold Products (All Time)</h5>
+                                <div class="chart-container" style="position: relative; height:300px;">
+                                    <canvas id="topProductsChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+                                <h5 class="fw-bold mb-4" data-i18n="monthly_rev">Monthly Sales (Revenue)</h5>
+                                <div class="chart-container" style="position: relative; height:300px;">
+                                    <canvas id="monthlySalesChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Udhaar View -->
+                <div id="view-udhaar" class="app-view d-none">
+                    <div class="d-flex justify-content-between align-items-center mb-4 gap-3 flex-wrap">
+                        <h4 class="fw-bold m-0 text-nowrap" data-i18n="udhaar_manage">Udhaar Ledger</h4>
+                        <div class="input-group search-group shadow-sm w-auto flex-grow-1" style="max-width: 400px;">
+                            <span class="input-group-text bg-white border-0"><i
+                                    class="fas fa-search text-muted"></i></span>
+                            <input type="text" id="udhaar-search" class="form-control border-0"
+                                placeholder="Search customer / mobile...">
+                        </div>
+                    </div>
+
+                    <ul class="nav nav-pills mb-4" id="udhaarTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active rounded-pill px-4" id="active-dues-tab" data-bs-toggle="pill"
+                                data-bs-target="#active-dues" type="button" data-i18n="active_dues">Active Dues</button>
+                        </li>
+                        <li class="nav-item ms-2" role="presentation">
+                            <button class="nav-link rounded-pill px-4" id="cleared-dues-tab" data-bs-toggle="pill"
+                                data-bs-target="#cleared-dues" type="button" data-i18n="cleared_dues">Cleared
+                                Accounts</button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="active-dues">
+                            <div class="card border-0 shadow-sm rounded-4">
+                                <div class="card-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover align-middle custom-table mb-0">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th data-i18n="enter_name">Customer Name</th>
+                                                    <th>Mobile</th>
+                                                    <th data-i18n="pending_due">Pending</th>
+                                                    <th>Last Paid</th>
+                                                    <th class="text-end" data-i18n="quick_actions">Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="active-udhaar-list"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="cleared-dues">
+                            <div class="card border-0 shadow-sm rounded-4">
+                                <div class="card-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover align-middle custom-table mb-0">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th data-i18n="enter_name">Customer Name</th>
+                                                    <th>Mobile</th>
+                                                    <th data-i18n="cleared_txt">Cleared</th>
+                                                    <th class="text-end" data-i18n="quick_actions">Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="cleared-udhaar-list"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile View -->
+                <div id="view-profile" class="app-view d-none">
+                    <div class="card border-0 shadow-sm rounded-4 p-4 mx-auto" style="max-width: 600px;">
+                        <h5 class="fw-bold mb-4" data-i18n="edit_profile">Edit Profile</h5>
+                        <form id="profile-form">
+                            <div class="mb-3">
+                                <label class="form-label" data-i18n="full_name">Full Name</label>
+                                <input type="text" id="profile-name" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label" data-i18n="shop_name">Shop Name</label>
+                                <input type="text" id="profile-shop" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label" data-i18n="mobile_number">Mobile Number</label>
+                                <input type="tel" id="profile-mobile" class="form-control" required>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label" data-i18n="upload_qr">Update Payment QR Code</label>
+                                <input type="file" id="profile-qr" class="form-control mb-3" accept="image/*">
+                                <div class="text-center">
+                                    <img id="profile-qr-preview" src="qr_placeholder.png"
+                                        class="img-fluid rounded border"
+                                        style="max-height: 200px; object-fit: contain;">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100 custom-btn" data-i18n="save_profile">Save
+                                Profile Config</button>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </section>
+
+    <!-- Modals -->
+
+    <!-- Add Product Modal -->
+    <div class="modal fade" id="addProductModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow rounded-4">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold" data-i18n="register_prod">Register New Product</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="add-product-form">
+                        <div class="mb-3">
+                            <label class="form-label" data-i18n="product_name">Product Name</label>
+                            <input type="text" id="prd-name" class="form-control" required>
+                        </div>
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label class="form-label" data-i18n="purchase_p">Purchase Price (₹)</label>
+                                <input type="number" id="prd-purchase" class="form-control" step="0.01" min="0"
+                                    required>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label class="form-label" data-i18n="selling_p">Selling Price (₹)</label>
+                                <input type="number" id="prd-selling" class="form-control" step="0.01" min="0" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-4 mb-4">
+                                <label class="form-label text-truncate w-100"><span data-i18n="rack_name">Rack</span>
+                                    <small class="text-muted" data-i18n="opt">(Opt)</small></label>
+                                <input type="text" id="prd-rack" class="form-control" placeholder="R1">
+                            </div>
+                            <div class="col-4 mb-4">
+                                <label class="form-label" data-i18n="side">Side</label>
+                                <select id="prd-side" class="form-select">
+                                    <option value="" selected>-</option>
+                                    <option value="Left" data-i18n="left">Left</option>
+                                    <option value="Right" data-i18n="right">Right</option>
+                                </select>
+                            </div>
+                            <div class="col-4 mb-4">
+                                <label class="form-label" data-i18n="shelf">Shelf</label>
+                                <select id="prd-shelf" class="form-select">
+                                    <option value="" selected>-</option>
+                                    <option value="Top" data-i18n="top">Top</option>
+                                    <option value="Middle" data-i18n="middle">Middle</option>
+                                    <option value="Bottom" data-i18n="bottom">Bottom</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 custom-btn" data-i18n="register_btn">Register
+                            Product</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Product Modal -->
+    <div class="modal fade" id="editProductModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow rounded-4">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold" data-i18n="edit_product">Edit Product</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="edit-product-form">
+                        <input type="hidden" id="edit-prd-id">
+                        <div class="mb-3">
+                            <label class="form-label" data-i18n="product_name">Product Name</label>
+                            <input type="text" id="edit-prd-name" class="form-control" required>
+                        </div>
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label class="form-label" data-i18n="purchase_p">Purchase Price (₹)</label>
+                                <input type="number" id="edit-prd-purchase" class="form-control" step="0.01" min="0"
+                                    required>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label class="form-label" data-i18n="selling_p">Selling Price (₹)</label>
+                                <input type="number" id="edit-prd-selling" class="form-control" step="0.01" min="0"
+                                    required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-4 mb-4">
+                                <label class="form-label text-truncate w-100"><span data-i18n="rack_name">Rack</span>
+                                    <small class="text-muted" data-i18n="opt">(Opt)</small></label>
+                                <input type="text" id="edit-prd-rack" class="form-control" placeholder="R1">
+                            </div>
+                            <div class="col-4 mb-4">
+                                <label class="form-label" data-i18n="side">Side</label>
+                                <select id="edit-prd-side" class="form-select">
+                                    <option value="" selected>-</option>
+                                    <option value="Left" data-i18n="left">Left</option>
+                                    <option value="Right" data-i18n="right">Right</option>
+                                </select>
+                            </div>
+                            <div class="col-4 mb-4">
+                                <label class="form-label" data-i18n="shelf">Shelf</label>
+                                <select id="edit-prd-shelf" class="form-select">
+                                    <option value="" selected>-</option>
+                                    <option value="Top" data-i18n="top">Top</option>
+                                    <option value="Middle" data-i18n="middle">Middle</option>
+                                    <option value="Bottom" data-i18n="bottom">Bottom</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 custom-btn" data-i18n="save_changes">Save
+                            Changes</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Add Batch Modal -->
+    <div class="modal fade" id="addBatchModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content border-0 shadow rounded-4">
+                <div class="modal-header border-0 pb-0">
+                    <h6 class="modal-title fw-bold"><span data-i18n="add_stock">Add Stock</span>: <span
+                            id="add-stock-name" class="text-primary"></span></h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="quick-add-batch-form">
+                        <input type="hidden" id="quick-stock-id">
+                        <div class="mb-3">
+                            <label class="form-label" data-i18n="qty">Quantity</label>
+                            <input type="number" id="quick-qty" class="form-control" min="1" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label" data-i18n="expiry">Expiry Date</label>
+                            <input type="date" id="quick-expiry" class="form-control" required>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100 custom-btn">+ <span data-i18n="add_stock">Add
+                                Stock</span></button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment QR Modal -->
+    <div class="modal fade" id="paymentModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content border-0 shadow rounded-4 text-center p-4">
+                <button type="button" class="btn-close position-absolute top-0 end-0 m-3"
+                    data-bs-dismiss="modal"></button>
+                <h5 class="fw-bold mb-3" data-i18n="scan_pay">Scan to Pay</h5>
+                <h3 class="text-primary mb-3 fw-bold">₹<span id="qr-amount">0.00</span></h3>
+                <div class="qr-container bg-light p-3 rounded-4 mb-3 d-inline-block mx-auto">
+                    <img id="qr-image" src="qr_placeholder.png" alt="QR Code" class="img-fluid"
+                        style="width: 200px; height: 200px; object-fit: cover; border-radius: 8px;">
+                </div>
+                <p class="text-muted small" data-i18n="supports_upi">Supports all UPI apps</p>
+                <button class="btn btn-success w-100" id="confirm-online-payment" data-bs-dismiss="modal"
+                    data-i18n="confirm_pay">Confirm Payment</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Checkout Success Options Modal -->
+    <div class="modal fade" id="checkoutSuccessModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content border-0 shadow rounded-4 text-center p-4">
+                <div class="text-success mb-3"><i class="fas fa-check-circle" style="font-size: 4rem;"></i></div>
+                <h5 class="fw-bold mb-4" data-i18n="payment_success">Payment Successful!</h5>
+                <div class="d-flex flex-column gap-2 mb-3">
+                    <button class="btn btn-outline-dark" id="btn-print-bill"><i class="fas fa-print"></i> <span
+                            data-i18n="print_bill">Print Bill</span></button>
+                    <button class="btn btn-outline-primary" id="btn-send-sms"><i class="fas fa-sms"></i> <span
+                            data-i18n="send_sms">Send SMS</span></button>
+                    <button class="btn btn-light text-muted" data-bs-dismiss="modal" id="btn-skip-bill"
+                        data-i18n="skip">Skip</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Receipt for Printing -->
+    <div id="print-receipt" class="d-none">
+        <h2 class="text-center fw-bold" id="receipt-shop-name">Shop Name</h2>
+        <p class="text-center text-muted mb-4" data-i18n="thank_you">Thank you for your purchase!</p>
+        <div class="table-responsive">
+            <table class="table table-borderless table-sm">
+                <thead>
+                    <tr class="border-bottom border-dark">
+                        <th data-i18n="item">Item</th>
+                        <th data-i18n="qty">Qty</th>
+                        <th class="text-end" data-i18n="amt">Amt</th>
+                    </tr>
+                </thead>
+                <tbody id="receipt-items"></tbody>
+            </table>
+        </div>
+        <div class="d-flex justify-content-between border-top border-dark pt-2 mt-2 fw-bold fs-5">
+            <span data-i18n="total">Total</span>
+            <span>₹<span id="receipt-total">0.00</span></span>
+        </div>
+        <p class="text-center text-muted mt-4 fs-6" data-i18n="visit_again">Visit Again!</p>
+    </div>
+
+    <!-- Udhaar Payment Modal -->
+    <div class="modal fade" id="udhaarPaymentModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content border-0 shadow rounded-4">
+                <div class="modal-header border-0 pb-0">
+                    <h6 class="modal-title fw-bold" data-i18n="record_payment">Record Payment</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-3"><span id="u-pay-name" class="fw-bold"></span><br><small class="text-muted"
+                            data-i18n="pending_due">Pending:</small> <strong class="text-danger">₹<span
+                                id="u-pay-amount"></span></strong></p>
+                    <form id="udhaar-pay-form">
+                        <input type="hidden" id="u-pay-mobile">
+                        <div class="mb-4">
+                            <label class="form-label" data-i18n="amount_paying">Amount Paying (₹)</label>
+                            <input type="number" id="u-pay-input" class="form-control" step="0.01" min="1" required>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-outline-success w-100" id="btn-pay-full"
+                                data-i18n="settle_due">Full Settle</button>
+                            <button type="submit" class="btn btn-primary w-100 custom-btn" data-i18n="save_payment">Save
+                                Payment</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Udhaar History Modal -->
+    <div class="modal fade" id="udhaarHistoryModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow rounded-4">
+                <div class="modal-header border-0 pb-0">
+                    <h6 class="modal-title fw-bold" data-i18n="payment_history">Payment History</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-0 mt-3">
+                    <div class="list-group list-group-flush" id="udhaar-history-list"
+                        style="max-height: 300px; overflow-y: auto;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Firebase (OLD COMPAT VERSION - IMPORTANT) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <!-- Other JS -->
+    <script src="i18n.js"></script>
+
+    <!-- App JS (ONLY ONCE) -->
+    <script src="app.js"></script>
+</body>
+
+</html>
