@@ -1,3 +1,6 @@
+/* ================================================
+   ROOT VARIABLES - Material Design 3 inspired
+   ================================================ */
 :root {
     --primary-color: #4361ee;
     --primary-light: #4cc9f0;
@@ -9,6 +12,15 @@
     --light-bg: #f8f9fa;
     --light-soft: #f4f6f9;
     --border-color: #e9ecef;
+    --sidebar-width: 260px;
+    --bottom-nav-height: 64px;
+}
+
+/* ================================================
+   BASE
+   ================================================ */
+* {
+    box-sizing: border-box;
 }
 
 body {
@@ -16,18 +28,25 @@ body {
     background-color: var(--light-bg);
     color: var(--dark-color);
     overflow-x: hidden;
+    margin: 0;
+    padding: 0;
 }
 
-/* Utilities */
+/* ================================================
+   UTILITIES
+   ================================================ */
 .gradient-text {
     background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .custom-btn {
-    border-radius: 8px;
+    border-radius: 12px;
     font-weight: 600;
+    font-size: 1rem;
+    min-height: 48px;
     transition: all 0.3s ease;
     border: none;
     background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
@@ -50,35 +69,46 @@ body {
     background-color: var(--light-soft);
 }
 
-/* Glass UI Elements */
+/* ================================================
+   GLASS UI
+   ================================================ */
 .glass-panel {
-    background: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
 }
 
-/* Auth Section */
+/* ================================================
+   AUTH SECTION
+   ================================================ */
 .auth-wrapper {
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
     background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    padding: 20px;
+    padding: 16px;
 }
 
 .auth-card {
     width: 100%;
     max-width: 450px;
-    padding: 40px;
+    padding: 32px 24px;
     border-radius: 20px;
 }
 
+@media (max-width: 480px) {
+    .auth-card {
+        padding: 24px 16px;
+    }
+}
+
 .auth-card .form-control {
-    border-radius: 8px;
-    padding: 12px 15px;
+    border-radius: 10px;
+    padding: 14px 15px;
+    font-size: 16px; /* Prevents zoom on iOS */
     background: rgba(255, 255, 255, 0.9);
     border: 1px solid #ddd;
 }
@@ -98,22 +128,28 @@ body {
     border-color: #ddd;
 }
 
-/* Layout */
+/* ================================================
+   APP LAYOUT — DESKTOP (sidebar visible)
+   ================================================ */
 #app-section {
     display: flex;
     height: 100vh;
     overflow: hidden;
+    position: relative;
 }
 
+/* SIDEBAR */
 .sidebar {
-    width: 260px;
+    width: var(--sidebar-width);
+    min-width: var(--sidebar-width);
     height: 100vh;
     background: white;
     display: flex;
     flex-direction: column;
     border-right: 1px solid var(--border-color);
     transition: all 0.3s;
-    z-index: 1000;
+    z-index: 100;
+    flex-shrink: 0;
 }
 
 .sidebar-header {
@@ -130,12 +166,14 @@ body {
 
 .sidebar-nav .nav-link {
     color: #6c757d;
-    padding: 15px 24px;
+    padding: 14px 24px;
     font-weight: 500;
+    font-size: 0.95rem;
     display: flex;
     align-items: center;
     gap: 12px;
     transition: all 0.2s;
+    min-height: 48px;
 }
 
 .sidebar-nav .nav-link:hover {
@@ -149,12 +187,23 @@ body {
     border-right: 3px solid var(--primary-color);
 }
 
+/* MAIN CONTENT */
 .main-content {
-    flex-grow: 1;
+    flex: 1;
+    min-width: 0;
     height: 100vh;
     overflow-y: auto;
-    padding: 30px 40px;
+    padding: 28px 36px;
     background-color: var(--light-bg);
+}
+
+/* TOP NAV / HEADER */
+.top-nav {
+    margin-bottom: 24px;
+}
+
+.welcome-text {
+    font-size: 0.9rem;
 }
 
 .avatar {
@@ -167,9 +216,68 @@ body {
     align-items: center;
     justify-content: center;
     font-size: 18px;
+    flex-shrink: 0;
 }
 
-/* Dashboard Cards */
+/* ================================================
+   BOTTOM NAV (mobile only — hidden on desktop)
+   ================================================ */
+.bottom-nav {
+    display: none; /* hidden by default on desktop */
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: var(--bottom-nav-height);
+    background: white;
+    border-top: 1px solid var(--border-color);
+    z-index: 1000;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+}
+
+.bottom-nav-inner {
+    display: flex;
+    height: 100%;
+    align-items: stretch;
+}
+
+.bottom-nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    color: #6c757d;
+    font-size: 0.65rem;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    background: none;
+    padding: 6px 4px;
+    transition: color 0.2s;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.bottom-nav-item i {
+    font-size: 1.35rem;
+    line-height: 1;
+}
+
+.bottom-nav-item.active,
+.bottom-nav-item:focus {
+    color: var(--primary-color);
+    outline: none;
+}
+
+.bottom-nav-item.active i {
+    font-weight: 900;
+}
+
+/* ================================================
+   DASHBOARD STAT CARDS
+   ================================================ */
 .gradient-card-1 {
     background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
     border-radius: 16px;
@@ -194,51 +302,67 @@ body {
     border: none;
 }
 
-/* Products Table */
+.stat-card {
+    border-radius: 16px;
+    min-height: 100px;
+}
+
+/* ================================================
+   PRODUCTS TABLE
+   ================================================ */
 .custom-table th {
     font-weight: 600;
     color: #6c757d;
     text-transform: uppercase;
-    font-size: 12px;
+    font-size: 11px;
     letter-spacing: 0.5px;
+    white-space: nowrap;
 }
 
-/* Quick Action Buttons */
+.custom-table td {
+    vertical-align: middle;
+    font-size: 0.9rem;
+}
+
 .btn-quick-action {
-    width: 28px;
-    height: 28px;
+    width: 34px;
+    height: 34px;
     padding: 0;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border-radius: 6px;
-    font-size: 0.8rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
 }
 
-/* Billing Grid */
+/* ================================================
+   BILLING
+   ================================================ */
 .search-group .form-control:focus {
     box-shadow: none;
 }
 
 .billing-product-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 15px;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
 }
 
 .product-item-card {
     background: white;
-    border-radius: 12px;
-    padding: 15px;
+    border-radius: 14px;
+    padding: 14px;
     border: 1px solid var(--border-color);
     cursor: pointer;
     transition: all 0.2s;
     text-align: center;
+    -webkit-tap-highlight-color: transparent;
 }
 
-.product-item-card:hover {
+.product-item-card:hover,
+.product-item-card:active {
     border-color: var(--primary-color);
-    box-shadow: 0 4px 12px rgba(67, 97, 238, 0.1);
+    box-shadow: 0 4px 12px rgba(67, 97, 238, 0.12);
     transform: translateY(-2px);
 }
 
@@ -248,10 +372,10 @@ body {
     font-size: 1.1rem;
 }
 
-/* Cart */
+/* CART */
 .cart-item {
     background: white;
-    border-radius: 10px;
+    border-radius: 12px;
     padding: 12px;
     margin-bottom: 10px;
     display: flex;
@@ -263,25 +387,25 @@ body {
 .qty-control {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     background: var(--light-soft);
     border-radius: 20px;
-    padding: 2px 5px;
+    padding: 4px 8px;
 }
 
 .qty-btn {
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     border: none;
     background: white;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 12px;
+    font-size: 14px;
     color: var(--dark-color);
     cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
 .qty-btn:hover {
@@ -289,7 +413,17 @@ body {
     color: white;
 }
 
-/* Charts */
+/* Payment method buttons */
+.payment-btn {
+    min-height: 64px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+/* ================================================
+   CHARTS
+   ================================================ */
 .chart-container {
     width: 100%;
     min-height: 250px;
@@ -298,58 +432,208 @@ body {
     justify-content: center;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-    #app-section {
-        flex-direction: column;
-    }
+/* ================================================
+   FORMS — touch-friendly inputs
+   ================================================ */
+.form-control,
+.form-select {
+    min-height: 46px;
+    font-size: 16px; /* prevents zoom on mobile */
+    border-radius: 10px;
+}
 
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+}
+
+.btn {
+    min-height: 44px;
+}
+
+.btn-lg {
+    min-height: 52px;
+    font-size: 1rem;
+}
+
+/* ================================================
+   MOBILE RESPONSIVE — max-width: 767px
+   ================================================ */
+@media (max-width: 767.98px) {
+
+    /* --- Show bottom nav, hide sidebar --- */
     .sidebar {
-        width: 100%;
-        height: auto;
-        flex-direction: row;
-        border-right: none;
-        border-bottom: 1px solid var(--border-color);
+        display: none !important;
     }
 
-    .sidebar-header {
-        padding: 15px;
-        border-bottom: none;
+    .bottom-nav {
+        display: block;
     }
 
-    .sidebar-nav {
-        flex-direction: row;
-        width: 100%;
-        margin-top: 0 !important;
-        overflow-x: auto;
+    /* --- App section full width --- */
+    #app-section {
+        display: block;
+        height: 100vh;
+        overflow: hidden;
     }
 
-    .sidebar-nav .nav-link {
-        white-space: nowrap;
-        padding: 15px;
-        border-right: none;
-        border-bottom: 3px solid transparent;
-    }
-
-    .sidebar-nav .nav-link.active {
-        border-right: none;
-        border-bottom: 3px solid var(--primary-color);
-    }
-
-    .sidebar .mt-auto {
-        display: none;
-    }
-
+    /* --- Main content fills screen, padding bottom for bottom nav --- */
     .main-content {
-        padding: 20px;
+        height: 100vh;
+        padding: 16px 14px;
+        padding-bottom: calc(var(--bottom-nav-height) + 12px);
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
+    /* --- Top header compact --- */
+    .top-nav {
+        margin-bottom: 16px;
+        flex-wrap: nowrap !important;
+        overflow: hidden;
+    }
+
+    #page-title {
+        font-size: 1.25rem;
+        white-space: nowrap;
+    }
+
+    .user-profile {
+        gap: 8px !important;
+    }
+
+    .welcome-text {
+        display: none; /* hide on very small screens */
+    }
+
+    .lang-toggle-btn {
+        font-size: 0.75rem;
+        padding: 4px 10px;
+    }
+
+    /* --- Dashboard stat cards: 2 per row --- */
+    .stat-cards-row .col-md-3 {
+        width: 50%;
+    }
+
+    .stat-card {
+        min-height: 90px;
+    }
+
+    .stat-card h3 {
+        font-size: 1.3rem;
+    }
+
+    .stat-card h4 {
+        font-size: 1rem;
+    }
+
+    /* --- Billing: stack product grid and cart --- */
     .billing-product-grid {
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: 10px;
+    }
+
+    /* --- Udhaar tabs --- */
+    #udhaarTabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 6px;
+    }
+
+    #udhaarTabs .nav-link {
+        white-space: nowrap;
+        font-size: 0.85rem;
+        padding: 8px 16px;
+    }
+
+    /* --- Products header wrap nicely --- */
+    #view-products > .d-flex {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 12px !important;
+    }
+
+    #view-products > .d-flex > div {
+        width: 100%;
+        max-width: 100% !important;
+    }
+
+    /* --- Buttons full width in product header --- */
+    #view-products .btn[data-bs-target="#addProductModal"] {
+        width: 100%;
+    }
+
+    /* --- Payment methods 3 columns always --- */
+    .payment-methods {
+        gap: 8px;
+    }
+
+    .payment-btn {
+        min-height: 60px;
+        font-size: 0.78rem;
+        padding: 8px 4px;
+    }
+
+    .payment-btn i {
+        font-size: 1.4rem !important;
+    }
+
+    /* --- Cards --- */
+    .card.rounded-4 {
+        border-radius: 14px !important;
+    }
+
+    /* --- Modals full width on small screens --- */
+    .modal-dialog {
+        margin: 12px;
+    }
+
+    .modal-dialog-centered {
+        min-height: calc(100% - 24px);
+    }
+
+    /* --- Tables: allow horizontal scroll --- */
+    .table-responsive {
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* --- Analytics: stack charts --- */
+    #view-analytics .col-md-6 {
+        width: 100%;
+    }
+
+    /* --- Profile form: full width --- */
+    #view-profile .card {
+        padding: 20px 16px !important;
+        max-width: 100% !important;
     }
 }
 
-/* Print Styles */
+/* ================================================
+   TABLET (768px - 991px)
+   ================================================ */
+@media (min-width: 768px) and (max-width: 991.98px) {
+    .sidebar {
+        width: 220px;
+        min-width: 220px;
+    }
+
+    .main-content {
+        padding: 20px 24px;
+    }
+
+    .sidebar-nav .nav-link {
+        padding: 12px 16px;
+        font-size: 0.9rem;
+    }
+}
+
+/* ================================================
+   PRINT STYLES
+   ================================================ */
 @media print {
     body * {
         visibility: hidden;
@@ -368,5 +652,10 @@ body {
         top: 0;
         width: 100%;
         padding: 20px;
+    }
+
+    .sidebar,
+    .bottom-nav {
+        display: none !important;
     }
 }

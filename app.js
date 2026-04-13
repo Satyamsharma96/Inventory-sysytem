@@ -166,29 +166,51 @@ function showApp() {
     loadDashboard();
 }
 
+function navigateTo(target) {
+    const titles = { dashboard: 'Dashboard', products: 'Products Inventory', billing: 'Point of Sale', analytics: 'Data Analytics', profile: 'Profile Settings', udhaar: 'Udhaar Ledger' };
+
+    // Hide all views
+    document.querySelectorAll('.app-view').forEach(v => v.classList.add('d-none'));
+
+    // Show target view
+    const targetView = document.getElementById('view-' + target);
+    if (targetView) targetView.classList.remove('d-none');
+
+    // Update page title
+    document.getElementById('page-title').innerText = titles[target] || target;
+
+    // Sync sidebar active state
+    document.querySelectorAll('.sidebar-nav .nav-link').forEach(l => {
+        l.classList.toggle('active', l.getAttribute('data-target') === target);
+    });
+
+    // Sync bottom-nav active state
+    document.querySelectorAll('.bottom-nav-item').forEach(b => {
+        b.classList.toggle('active', b.getAttribute('data-target') === target);
+    });
+
+    // Load view data
+    if (target === 'dashboard') loadDashboard();
+    else if (target === 'products') loadProducts();
+    else if (target === 'billing') loadBilling();
+    else if (target === 'analytics') loadAnalytics();
+    else if (target === 'profile') loadProfile();
+    else if (target === 'udhaar') renderCustomers();
+}
+
 function attachEventListeners() {
-    const navLinks = document.querySelectorAll('.sidebar-nav .nav-link');
-    navLinks.forEach(link => {
+    // Sidebar nav links
+    document.querySelectorAll('.sidebar-nav .nav-link').forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
-            navLinks.forEach(l => l.classList.remove('active'));
-            link.classList.add('active');
+            navigateTo(link.getAttribute('data-target'));
+        });
+    });
 
-            const target = link.getAttribute('data-target');
-            document.querySelectorAll('.app-view').forEach(v => v.classList.add('d-none'));
-
-            const titles = { dashboard: 'Dashboard', products: 'Products Inventory', billing: 'Point of Sale', analytics: 'Data Analytics', profile: 'Profile Settings', udhaar: 'Udhaar Ledger' };
-            document.getElementById('page-title').innerText = titles[target];
-            if (document.getElementById('view-' + target)) {
-                document.getElementById('view-' + target).classList.remove('d-none');
-            }
-
-            if (target === 'dashboard') loadDashboard();
-            else if (target === 'products') loadProducts();
-            else if (target === 'billing') loadBilling();
-            else if (target === 'analytics') loadAnalytics();
-            else if (target === 'profile') loadProfile();
-            else if (target === 'udhaar') renderCustomers();
+    // Bottom nav buttons (mobile)
+    document.querySelectorAll('.bottom-nav-item').forEach(btn => {
+        btn.addEventListener('click', () => {
+            navigateTo(btn.getAttribute('data-target'));
         });
     });
 
