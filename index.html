@@ -647,8 +647,8 @@
                             <input type="number" id="quick-qty" class="form-control" min="1" required>
                         </div>
                         <div class="mb-4">
-                            <label class="form-label" data-i18n="expiry">Expiry Date</label>
-                            <input type="date" id="quick-expiry" class="form-control" required>
+                            <label class="form-label">Expiry Date <small class="text-muted">(Optional)</small></label>
+                            <input type="date" id="quick-expiry" class="form-control">
                         </div>
                         <button type="submit" class="btn btn-success w-100 custom-btn">+ <span data-i18n="add_stock">Add
                                 Stock</span></button>
@@ -787,6 +787,10 @@
             <button class="bottom-nav-item" data-target="analytics" aria-label="More">
                 <i class="fas fa-chart-pie"></i>
                 <span data-i18n="analytics">More</span>
+            </button>
+            <button class="bottom-nav-item" id="mobile-logout-btn" aria-label="Logout" style="color: #e74c3c;">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
             </button>
         </div>
     </nav>

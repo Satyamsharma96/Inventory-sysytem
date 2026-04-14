@@ -129,27 +129,94 @@ document.getElementById('signup-qr').addEventListener('change', function (e) {
 
 document.getElementById('signup-form').addEventListener('submit', (e) => {
     e.preventDefault();
-    const name = document.getElementById('signup-name').value;
-    const shop = document.getElementById('signup-shop').value;
-    const mobile = document.getElementById('signup-mobile').value;
-    const email = document.getElementById('signup-email').value;
+    const name = document.getElementById('signup-name').value.trim();
+    const shop = document.getElementById('signup-shop').value.trim();
+    const mobile = document.getElementById('signup-mobile').value.trim();
+    const email = document.getElementById('signup-email').value.trim();
     const password = document.getElementById('signup-password').value;
+    const qrCode = pendingSignupQR || null;
 
-    if (users.find(u => u.email === email)) { alert("Email already registered!"); return; }
-    users.push({ name, shop, mobile, email, password, qrCode: pendingSignupQR });
-    saveUsers();
-    alert("Signup successful! Please login.");
-    document.getElementById('show-login').click();
+    const btn = document.querySelector('#signup-form button[type="submit"]');
+    btn.disabled = true;
+    btn.innerText = 'Saving...';
+
+    // Check duplicate in Firebase first
+    db.collection('users').doc(email).get()
+        .then(doc => {
+            if (doc.exists) {
+                alert("Email already registered! Please login.");
+                btn.disabled = false;
+                btn.innerText = 'Complete Signup';
+                return;
+            }
+
+            const userData = { name, shop, mobile, email, password, qrCode, createdAt: new Date().toISOString() };
+
+            // Save to Firebase Firestore
+            return db.collection('users').doc(email).set(userData)
+                .then(() => {
+                    // Also sync to localStorage for offline fallback
+                    const idx = users.findIndex(u => u.email === email);
+                    if (idx > -1) users[idx] = userData; else users.push(userData);
+                    saveUsers();
+
+                    pendingSignupQR = null;
+                    document.getElementById('signup-qr-preview').classList.add('d-none');
+                    document.getElementById('signup-form').reset();
+                    alert("✅ Signup successful! Please login.");
+                    document.getElementById('show-login').click();
+                });
+        })
+        .catch(err => {
+            alert("Signup error: " + err.message);
+        })
+        .finally(() => {
+            btn.disabled = false;
+            btn.innerText = 'Complete Signup';
+        });
 });
 
 document.getElementById('login-form').addEventListener('submit', (e) => {
     e.preventDefault();
-    const email = document.getElementById('login-email').value;
+    const email = document.getElementById('login-email').value.trim();
     const password = document.getElementById('login-password').value;
 
-    const user = users.find(u => u.email === email && u.password === password);
-    if (user) { currentUser = user; saveCurrentUser(); showApp(); initFirebaseListeners(); }
-    else alert("Invalid email or password!");
+    // First try Firebase, fall back to localStorage if offline
+    db.collection('users').doc(email).get()
+        .then(doc => {
+            if (doc.exists) {
+                const fbUser = doc.data();
+                if (fbUser.password === password) {
+                    currentUser = fbUser;
+                    // Sync to localStorage
+                    const idx = users.findIndex(u => u.email === email);
+                    if (idx > -1) users[idx] = fbUser; else users.push(fbUser);
+                    saveUsers();
+                    saveCurrentUser();
+                    showApp();
+                    initFirebaseListeners();
+                } else {
+                    alert("Invalid email or password!");
+                }
+            } else {
+                // Fallback: try localStorage users array
+                const user = users.find(u => u.email === email && u.password === password);
+                if (user) {
+                    currentUser = user;
+                    saveCurrentUser();
+                    showApp();
+                    initFirebaseListeners();
+                } else {
+                    alert("Invalid email or password!");
+                }
+            }
+        })
+        .catch(() => {
+            // Offline fallback
+            const user = users.find(u => u.email === email && u.password === password);
+            if (user) { currentUser = user; saveCurrentUser(); showApp(); initFirebaseListeners(); }
+            else alert("Invalid email or password!");
+        });
 });
 
 document.getElementById('logout-btn').addEventListener('click', () => {
@@ -221,6 +288,19 @@ function attachEventListeners() {
 
     const uSearch = document.getElementById('udhaar-search');
     if (uSearch) uSearch.addEventListener('input', renderCustomers);
+
+    // Mobile logout button
+    const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
+    if (mobileLogoutBtn) {
+        mobileLogoutBtn.addEventListener('click', () => {
+            if (confirm('Logout karna chahte hain?')) {
+                currentUser = null;
+                saveCurrentUser();
+                removeFirebaseListeners();
+                showAuth();
+            }
+        });
+    }
 }
 
 // ----------------------------------------------------
@@ -284,9 +364,10 @@ function checkAlerts() {
             </li>`;
         }
 
-        // Expiry Rule: <= 3 days
+        // Expiry Rule: <= 3 days (skip batches with no expiry date)
         if (p.batches) {
             p.batches.forEach(b => {
+                if (!b.expiry) return; // expiry is optional — skip if not set
                 let exp = new Date(b.expiry);
                 if (exp <= threeDaysFromNow && b.qty > 0) {
                     expiryCount++;
@@ -482,7 +563,9 @@ document.getElementById('quick-add-batch-form').addEventListener('submit', (e) =
     e.preventDefault();
     const id = document.getElementById('quick-stock-id').value;
     const qty = parseInt(document.getElementById('quick-qty').value);
-    const expiry = document.getElementById('quick-expiry').value;
+    const expiryRaw = document.getElementById('quick-expiry').value;
+    // Expiry is optional — store null if not provided
+    const expiry = expiryRaw ? expiryRaw : null;
 
     const product = products.find(p => p.id === id);
     if (!product.batches) product.batches = [];
@@ -506,7 +589,12 @@ function quickReduceStock(id) {
     if (reduceAmt > stock) { alert("Can't reduce more than available stock!"); return; }
 
     // FIFO Deduct without recording an order (since it's a discard/correction)
-    product.batches.sort((a, b) => new Date(a.expiry) - new Date(b.expiry));
+    // Batches without expiry go last (treat as far future)
+    product.batches.sort((a, b) => {
+        const dA = a.expiry ? new Date(a.expiry) : new Date('9999-12-31');
+        const dB = b.expiry ? new Date(b.expiry) : new Date('9999-12-31');
+        return dA - dB;
+    });
     let remainingToDeduct = reduceAmt;
     for (let i = 0; i < product.batches.length; i++) {
         if (remainingToDeduct <= 0) break;
@@ -681,7 +769,12 @@ function processCheckout() {
             sellingPrice: cartItem.selling_price
         });
 
-        product.batches.sort((a, b) => new Date(a.expiry) - new Date(b.expiry));
+        // FIFO sort — batches without expiry go last
+        product.batches.sort((a, b) => {
+            const dA = a.expiry ? new Date(a.expiry) : new Date('9999-12-31');
+            const dB = b.expiry ? new Date(b.expiry) : new Date('9999-12-31');
+            return dA - dB;
+        });
         let remainingToDeduct = cartItem.qty;
 
         for (let i = 0; i < product.batches.length; i++) {
@@ -966,12 +1059,12 @@ function renderCustomers() {
 function openUdhaarPayment(mobile) {
     const acc = customers.find(a => a.mobile === mobile);
     if (!acc) return;
-    
+
     // Fix undefined names
     const displayName = acc.customerName || acc.name || "Unknown";
     document.getElementById('u-pay-name').innerText = displayName;
     document.getElementById('u-pay-mobile').value = acc.mobile;
-    
+
     // Exact rounding to prevent floating point mismatch errors
     let totalDue = parseFloat((acc.total_due !== undefined) ? acc.total_due : acc.totalDue) || 0;
     totalDue = parseFloat(totalDue.toFixed(2));
@@ -983,15 +1076,15 @@ function openUdhaarPayment(mobile) {
 
     const stlBtn = document.getElementById('btn-pay-full');
     stlBtn.innerText = `Full Settle (₹${totalDue.toFixed(2)})`;
-    
+
     // Auto-trigger submit logic
-    stlBtn.onclick = function() {
+    stlBtn.onclick = function () {
         document.getElementById('u-pay-input').value = totalDue.toFixed(2);
-        
+
         let confirmSettle = confirm("Confirm Full Settlement of ₹" + totalDue.toFixed(2) + " ?");
-        if(confirmSettle) {
+        if (confirmSettle) {
             const saveBtn = document.querySelector('#udhaar-pay-form button[type="submit"]');
-            if(saveBtn) saveBtn.click();
+            if (saveBtn) saveBtn.click();
         }
     };
 
@@ -1006,18 +1099,18 @@ document.getElementById('udhaar-pay-form').addEventListener('submit', (e) => {
     const mobile = document.getElementById('u-pay-mobile').value;
     const amt = parseFloat(document.getElementById('u-pay-input').value);
     const acc = customers.find(a => a.mobile === mobile);
-    
+
     if (!acc) return;
     let totalDue = parseFloat((acc.total_due !== undefined) ? acc.total_due : acc.totalDue) || 0;
     totalDue = parseFloat(totalDue.toFixed(2));
 
     if (isNaN(amt) || amt <= 0 || amt > (totalDue + 0.01)) {
-        alert("Invalid amount! Cannot exceed total due."); 
+        alert("Invalid amount! Cannot exceed total due.");
         return;
     }
 
     let now = new Date().toISOString();
-    
+
     db.collection('customers').doc(acc.id).update({
         total_due: firebase.firestore.FieldValue.increment(-amt),
         lastPaymentDate: now,
