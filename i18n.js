@@ -36,7 +36,21 @@ const translations = {
         amount_paying: "Amount Paying (₹)", save_payment: "Save Payment",
         mobile_req: "Mobile Number (Required for Udhaar)",
         enter_name: "Customer Name",
-        udhaar_btn: "Credit / Udhaar"
+        udhaar_btn: "Credit / Udhaar",
+        plan_expired: "Your plan has expired.",
+        upgrade_now: "Upgrade Now",
+        monthly_plan: "Monthly Plan",
+        yearly_plan: "Yearly Plan",
+        apply_coupon: "Apply Coupon",
+        invalid_coupon: "Invalid or Expired Coupon",
+        coupon_applied: "Coupon Applied Successfully!",
+        days_remaining: "{days} days remaining",
+        upgrade_title: "Choose Your Plan",
+        upgrade_desc: "Unlock all premium features including Analytics, Unlimited Products, and Image Storage.",
+        select_plan: "Select Plan",
+        enter_coupon: "Enter Coupon Code",
+        trial_active: "Trial Active",
+        expires_today: "Expires Today!"
     },
     hi: {
         welcome_back: "वापसी पर स्वागत है", email_addr: "ईमेल पता", password: "पासवर्ड",
@@ -75,7 +89,21 @@ const translations = {
         amount_paying: "भुगतान राशि (₹)", save_payment: "भुगतान सहेजें",
         mobile_req: "मोबाइल नंबर (उधार के लिए आवश्यक)",
         enter_name: "ग्राहक का नाम",
-        udhaar_btn: "उधार"
+        udhaar_btn: "उधार",
+        plan_expired: "आपकी योजना समाप्त हो गई है।",
+        upgrade_now: "अभी अपग्रेड करें",
+        monthly_plan: "मासिक योजना",
+        yearly_plan: "वार्षिक योजना",
+        apply_coupon: "कूपन लागू करें",
+        invalid_coupon: "अमान्य या समाप्त कूपन",
+        coupon_applied: "कूपन सफलतापूर्वक लागू किया गया!",
+        days_remaining: "{days} दिन शेष",
+        upgrade_title: "अपनी योजना चुनें",
+        upgrade_desc: "एनालिटिक्स, असीमित उत्पाद और इमेज स्टोरेज जैसी सभी प्रीमियम सुविधाएं प्राप्त करें।",
+        select_plan: "योजना चुनें",
+        enter_coupon: "कूपन कोड दर्ज करें",
+        trial_active: "ट्रायल सक्रिय है",
+        expires_today: "आज समाप्त हो रहा है!"
     }
 };
 

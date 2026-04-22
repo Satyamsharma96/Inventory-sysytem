@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShopApp — Admin Panel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --admin-bg:      #0f1117;
+            --admin-surface: #1a1d27;
+            --admin-card:    #21253a;
+            --admin-border:  #2e3250;
+            --primary:       #6c63ff;
+            --primary-glow:  rgba(108,99,255,0.25);
+            --success:       #00d084;
+            --danger:        #ff4d6d;
+            --warning:       #ffd166;
+            --info:          #4cc9f0;
+            --text-primary:  #eef0fb;
+            --text-muted:    #8b90b0;
+            --shadow:        0 8px 32px rgba(0,0,0,0.3);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Outfit', sans-serif; background: var(--admin-bg); color: var(--text-primary); min-height: 100vh; overflow-x: hidden; }
+
+        /* LOGIN */
+        #admin-login-screen { position: fixed; inset: 0; z-index: 9999; background: linear-gradient(135deg, #0f1117 0%, #1a1d3a 100%); display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .login-card { background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: 24px; padding: 36px 28px; max-width: 400px; width: 100%; box-shadow: 0 30px 80px rgba(0,0,0,0.5); }
+        .login-logo { width: 60px; height: 60px; background: linear-gradient(135deg, var(--primary), #a78bfa); border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 26px; color: white; margin: 0 auto 20px; box-shadow: 0 0 30px var(--primary-glow); }
+        .login-card input { background: var(--admin-card); border: 1px solid var(--admin-border); color: var(--text-primary); border-radius: 12px; padding: 14px 16px; font-size: 1rem; font-family: 'Outfit', sans-serif; width: 100%; margin-bottom: 12px; transition: border-color 0.2s; }
+        .login-card input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
+        .btn-login { background: linear-gradient(135deg, var(--primary), #a78bfa); color: white; border: none; border-radius: 12px; padding: 14px 20px; font-size: 1rem; font-weight: 700; font-family: 'Outfit', sans-serif; width: 100%; cursor: pointer; min-height: 50px; transition: transform 0.2s; margin-top: 4px; }
+        .btn-login:active { transform: scale(0.98); }
+        .login-hint { margin-top: 16px; padding: 12px; background: rgba(108,99,255,0.08); border: 1px solid rgba(108,99,255,0.2); border-radius: 10px; font-size: 0.8rem; color: var(--text-muted); text-align: center; }
+        #login-error { display:none; background:rgba(255,77,109,0.1); border:1px solid rgba(255,77,109,0.3); border-radius:10px; padding:10px 14px; font-size:0.82rem; color:var(--danger); margin-bottom:14px; }
+
+        /* PANEL WRAP */
+        #admin-panel-wrap { display: none; min-height: 100vh; }
+
+        /* SIDEBAR (Hidden on mobile) */
+        .admin-sidebar { width: 260px; height: 100%; background: var(--admin-surface); border-right: 1px solid var(--admin-border); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 300; transition: transform 0.28s cubic-bezier(0.4,0,0.2,1); overflow-y: auto; }
+        .sidebar-logo { padding: 22px 20px 16px; border-bottom: 1px solid var(--admin-border); display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+        .sidebar-logo .logo-icon { width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(135deg, var(--primary), #a78bfa); display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; box-shadow: 0 0 20px var(--primary-glow); flex-shrink: 0; }
+        .sidebar-logo h5 { font-weight: 700; font-size: 1rem; margin: 0; }
+        .sidebar-logo small { font-size: 0.68rem; color: var(--primary); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; display: block; }
+        .sidebar-nav { padding: 12px; flex: 1; overflow-y: auto; }
+        .nav-section-label { font-size: 0.6rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); padding: 8px 12px 4px; }
+        .sidebar-nav .nav-link { color: var(--text-muted); padding: 11px 14px; border-radius: 10px; font-weight: 500; font-size: 0.88rem; display: flex; align-items: center; gap: 10px; margin-bottom: 2px; transition: all 0.2s; text-decoration: none; }
+        .sidebar-nav .nav-link:hover { background: rgba(108,99,255,0.08); color: var(--text-primary); }
+        .sidebar-nav .nav-link.active { background: var(--primary-glow); color: var(--primary); font-weight: 600; }
+        .sidebar-footer { padding: 14px; border-top: 1px solid var(--admin-border); flex-shrink: 0; }
+        .admin-badge { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: rgba(108,99,255,0.1); border-radius: 10px; border: 1px solid rgba(108,99,255,0.2); }
+        .admin-avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), #a78bfa); display: flex; align-items: center; justify-content: center; font-size: 13px; color: white; flex-shrink: 0; }
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 250; }
+
+        /* MAIN */
+        .admin-main { margin-left: 260px; min-height: 100vh; flex: 1; display: flex; flex-direction: column; transition: margin-left 0.28s; }
+        .admin-topbar { background: var(--admin-surface); border-bottom: 1px solid var(--admin-border); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; flex-shrink: 0; }
+        .admin-topbar h4 { font-weight: 800; font-size: 1.2rem; margin: 0; letter-spacing: -0.5px; }
+        .topbar-actions { display: flex; align-items: center; gap: 10px; }
+        .admin-content { padding: 16px; flex: 1; max-width: 1400px; margin: 0 auto; width: 100%; }
+
+        /* HAMBURGER */
+        .hamburger { display: none; background: rgba(108,99,255,0.1); border: 1px solid rgba(108,99,255,0.2); color: var(--text-primary); font-size: 1.1rem; cursor: pointer; border-radius: 10px; width: 44px; height: 44px; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; }
+
+        /* STAT GRID (Side-by-side on mobile: 2 -> 4) */
+        .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 24px; }
+        @media (min-width: 1200px) { .stat-grid { grid-template-columns: repeat(4, 1fr); } }
+
+        .stat-card { background: var(--admin-card); border: 1px solid var(--admin-border); border-radius: 16px; padding: 20px; position: relative; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; box-shadow: var(--shadow); }
+        .stat-card:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,0.4); }
+        .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; border-radius: 16px 16px 0 0; }
+        .stat-card.primary::before { background: var(--primary); }
+        .stat-card.success::before { background: var(--success); }
+        .stat-card.danger::before  { background: var(--danger); }
+        .stat-card.warning::before { background: var(--warning); }
+        .stat-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; margin-bottom: 12px; }
+        .stat-icon.primary { background: rgba(108,99,255,0.15); color: var(--primary); }
+        .stat-icon.success { background: rgba(0,208,132,0.15);  color: var(--success); }
+        .stat-icon.danger  { background: rgba(255,77,109,0.15); color: var(--danger); }
+        .stat-icon.warning { background: rgba(255,209,102,0.15); color: var(--warning); }
+        .stat-value { font-size: 1.8rem; font-weight: 800; line-height: 1; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .stat-label { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* SECTION */
+        .admin-section { background: var(--admin-card); border: 1px solid var(--admin-border); border-radius: 20px; overflow: hidden; margin-bottom: 24px; box-shadow: var(--shadow); }
+        .section-header { padding: 18px 20px; border-bottom: 1px solid var(--admin-border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+        .section-header h6 { font-weight: 800; font-size: 1rem; margin: 0; display: flex; align-items: center; gap: 10px; }
+        .section-header h6 i { color: var(--primary); font-size: 1.1rem; }
+
+        /* SEARCH */
+        .admin-search { position: relative; flex: 1; min-width: 200px; }
+        .admin-search input { background: var(--admin-surface); border: 1px solid var(--admin-border); color: var(--text-primary); border-radius: 12px; padding: 10px 16px 10px 42px; font-size: 0.9rem; font-family: 'Outfit', sans-serif; width: 100%; transition: all 0.2s; min-height: 44px; }
+        .admin-search input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-glow); }
+        .admin-search i { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.9rem; }
+
+        /* FORM CONTROLS */
+        .form-label { color: var(--text-primary); font-weight: 600; font-size: 0.85rem; margin-bottom: 8px; opacity: 0.9; }
+        .admin-input { background: var(--admin-surface); border: 1px solid var(--admin-border); color: var(--text-primary); border-radius: 12px; padding: 12px 16px; font-size: 0.95rem; font-family: 'Outfit', sans-serif; width: 100%; transition: all 0.2s; }
+        .admin-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-glow); background: var(--admin-card); }
+        .admin-input::placeholder { color: var(--text-muted); opacity: 0.6; }
+
+        /* TABLE & STICKY FEATURES */
+        .admin-table-wrap { 
+            position: relative;
+            overflow-x: auto; 
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch; 
+            border-radius: 16px;
+            background: var(--admin-card);
+        }
+        
+        .admin-table { 
+            width: 100%; 
+            border-collapse: separate; 
+            border-spacing: 0;
+            min-width: 900px; 
+        }
+
+        /* Sticky First Column */
+        .admin-table thead th:first-child,
+        .admin-table tbody td:first-child {
+            position: sticky !important;
+            left: 0;
+            z-index: 10;
+            background: var(--admin-card) !important;
+            box-shadow: 4px 0 10px rgba(0,0,0,0.3);
+            border-right: 1px solid var(--admin-border);
+        }
+        .admin-table thead th:first-child { z-index: 21; }
+
+        /* Sticky Header */
+        .admin-table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            background: var(--admin-card);
+            border-bottom: 2px solid var(--admin-border);
+            padding: 14px 20px; 
+            font-size: 0.72rem; 
+            font-weight: 700; 
+            letter-spacing: 1.2px; 
+            text-transform: uppercase; 
+            color: var(--text-muted); 
+            white-space: nowrap; 
+            text-align: left;
+        }
+
+        .admin-table tbody tr { border-bottom: 1px solid var(--admin-border); transition: background 0.2s; }
+        .admin-table tbody tr:hover { background: rgba(108,99,255,0.04); }
+        .admin-table td { padding: 16px 20px; font-size: 0.9rem; vertical-align: middle; white-space: nowrap; background: inherit; }
+
+        /* SCROLL HINT */
+        .scroll-hint {
+            display: none;
+            text-align: center;
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--primary);
+            padding: 10px;
+            background: var(--primary-glow);
+            border-radius: 12px;
+            margin-bottom: 16px;
+            border: 1px dashed var(--primary);
+            animation: scroll-pulse 2s infinite;
+        }
+        @keyframes scroll-pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(0.98); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        /* BADGES */
+        .user-avatar { width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, var(--primary), #a78bfa); display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; color: white; flex-shrink: 0; box-shadow: 0 4px 10px rgba(108,99,255,0.3); }
+        .badge-plan { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
+        .badge-plan.premium { background: rgba(255,209,102,0.15); color: var(--warning); border: 1px solid rgba(255,209,102,0.3); }
+        .badge-plan.free    { background: rgba(139,144,176,0.15); color: var(--text-muted); border: 1px solid var(--admin-border); }
+        .badge-plan.monthly { background: rgba(76,201,240,0.15); color: var(--info); border: 1px solid rgba(76,201,240,0.3); }
+        .badge-plan.yearly  { background: rgba(0,208,132,0.15); color: var(--success); border: 1px solid rgba(0,208,132,0.3); }
+
+        .badge-status { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
+        .badge-status::before { content: ''; width: 6px; height: 6px; border-radius: 50%; }
+        .badge-status.active  { background: rgba(0,208,132,0.12); color: var(--success); }
+        .badge-status.active::before  { background: var(--success); }
+        .badge-status.blocked { background: rgba(255,77,109,0.12); color: var(--danger); }
+        .badge-status.blocked::before { background: var(--danger); }
+        .badge-status.pending { background: rgba(255,209,102,0.12); color: var(--warning); }
+        .badge-status.pending::before { background: var(--warning); }
+
+        /* BUTTONS */
+        .action-btn { min-width: 44px; min-height: 44px; border-radius: 12px; border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 1rem; transition: all 0.2s; margin: 0 4px; }
+        .action-btn.btn-block   { background: rgba(255,77,109,0.1); color: var(--danger); }
+        .action-btn.btn-block:hover   { background: var(--danger); color: white; }
+        .action-btn.btn-unblock { background: rgba(0,208,132,0.1); color: var(--success); }
+        .action-btn.btn-unblock:hover { background: var(--success); color: white; }
+        .action-btn.btn-premium { background: rgba(255,209,102,0.1); color: var(--warning); }
+        .action-btn.btn-premium:hover { background: var(--warning); color: #1a1d27; }
+
+        .btn-refresh, .btn-logout, .btn-primary-admin { min-height: 44px; border-radius: 12px; padding: 8px 16px; font-size: 0.88rem; font-family: 'Outfit', sans-serif; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s; white-space: nowrap; border: 1px solid transparent; }
+        .btn-refresh { background: rgba(108,99,255,0.1); color: var(--primary); border-color: rgba(108,99,255,0.2); }
+        .btn-refresh:hover { background: var(--primary); color: white; }
+        .btn-logout { background: rgba(255,77,109,0.1); color: var(--danger); border-color: rgba(255,77,109,0.2); }
+        .btn-logout:hover { background: var(--danger); color: white; }
+
+        /* PILLS */
+        .filter-pills { display: flex; gap: 8px; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none; }
+        .filter-pills::-webkit-scrollbar { display: none; }
+        .filter-pill { padding: 8px 18px; border-radius: 20px; border: 1px solid var(--admin-border); background: var(--admin-surface); color: var(--text-muted); font-size: 0.82rem; font-family: 'Outfit', sans-serif; font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; min-height: 38px; }
+        .filter-pill:hover, .filter-pill.active { background: var(--primary); border-color: var(--primary); color: white; box-shadow: 0 4px 15px var(--primary-glow); }
+
+        /* MOBILE CARDS */
+        .user-cards-mobile { display: block; padding: 12px 16px; }
+        .user-card-mobile { background: var(--admin-card); border: 1px solid var(--admin-border); border-radius: 20px; padding: 18px; margin-bottom: 16px; box-shadow: var(--shadow); }
+        .user-card-mobile .user-row { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+        .user-card-mobile .user-info h6 { font-size: 1rem; font-weight: 800; margin: 0 0 2px; }
+        .user-card-mobile .user-info small { color: var(--text-muted); font-size: 0.8rem; word-break: break-all; font-weight: 500; }
+        .user-card-mobile .user-meta { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; border-top: 1px solid var(--admin-border); padding-top: 14px; }
+        .user-card-mobile .user-meta > span { color: var(--text-primary); opacity: 0.8; font-size: 0.82rem; }
+        .user-card-mobile .user-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+        .action-btn-full { flex: 1; min-height: 48px; border-radius: 12px; border: none; font-size: 0.85rem; font-family: 'Outfit', sans-serif; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; }
+
+        /* BOTTOM NAV (Premium Look) */
+        .admin-bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 75px; background: var(--admin-surface); border-top: 1px solid var(--admin-border); z-index: 400; display: flex; align-items: stretch; box-shadow: 0 -10px 40px rgba(0,0,0,0.5); padding: 0 8px 15px; /* Extra bottom padding for home indicator */ }
+        .bottom-nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; background: none; border: none; color: var(--text-muted); font-family: 'Outfit', sans-serif; font-size: 0.65rem; font-weight: 700; cursor: pointer; padding: 8px 2px; transition: all 0.3s; position: relative; }
+        .bottom-nav-item i { font-size: 1.4rem; transition: transform 0.2s; }
+        .bottom-nav-item.active { color: var(--primary); }
+        .bottom-nav-item.active i { transform: translateY(-3px); }
+        .bottom-nav-item .nav-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--primary); position: absolute; bottom: 6px; display: none; }
+        .bottom-nav-item.active .nav-dot { display: block; }
+
+        /* RESPONSIVE BREAKPOINTS */
+        @media (max-width: 1199px) {
+            .admin-sidebar { transform: translateX(-100%); }
+            .admin-main { margin-left: 0; padding-bottom: 100px; }
+            .hamburger { display: flex; }
+        }
+
+        /* MOBILE CARDS & TABLES */
+        @media (max-width: 576px) {
+            .admin-topbar { padding: 10px 14px; }
+            .admin-topbar h4 { font-size: 1rem; }
+            .admin-content { padding: 10px; }
+            .hide-mobile { display: none !important; }
+            .btn-refresh, .btn-logout { width: 38px; height: 38px; padding: 0; justify-content: center; }
+            .section-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+            .section-header > * { width: 100%; }
+            
+            /* Tweak stats to fit side by side */
+            .stat-value { font-size: 1.25rem; }
+            .stat-icon { width: 38px; height: 38px; font-size: 1rem; }
+            .stat-card { padding: 14px; border-radius: 12px; }
+            
+            /* Table Horizontal Scrolling */
+            .admin-table-wrap { margin-bottom: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+            .admin-table td, .admin-table th { font-size: 0.78rem !important; padding: 10px 12px !important; }
+            .scroll-hint { display: block; }
+            
+            #admin-toast { bottom: 90px; left: 16px; right: 16px; max-width: none; }
+            .action-btn-full { font-size: 0.75rem; padding: 0 8px; min-width: 80px; white-space: nowrap; height: 40px; }
+            
+            /* Chart height for mobile */
+            canvas { max-height: 250px !important; }
+        }
+
+
+        /* DESKTOP DEFAULTS */
+        @media (min-width: 1200px) {
+            .user-cards-mobile { display: none; }
+            .admin-table-wrap { display: block !important; }
+            .admin-bottom-nav { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="admin-login-screen">
+    <div class="login-card">
+        <div class="login-logo"><i class="fas fa-shield-alt"></i></div>
+        <h4 style="text-align:center;font-weight:800;margin-bottom:4px;">Admin Login</h4>
+        <p style="text-align:center;font-size:0.82rem;color:var(--text-muted);margin-bottom:24px;">ShopApp SaaS Control Panel</p>
+        <div id="login-error"></div>
+        <form id="admin-login-form">
+            <input type="email" id="admin-email-input" placeholder="Admin Email" value="admin@shop.com" required>
+            <input type="password" id="admin-pass-input" placeholder="Password" required>
+            <button type="submit" class="btn-login"><i class="fas fa-sign-in-alt me-2"></i>Login to Admin Panel</button>
+        </form>
+        <div class="login-hint"><i class="fas fa-info-circle me-1"></i> Default: <strong>admin@shop.com</strong> / <strong>123456</strong></div>
+    </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="admin-panel-wrap">
+
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<!-- SIDEBAR -->
+<aside class="admin-sidebar" id="admin-sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-icon"><i class="fas fa-shield-alt"></i></div>
+        <div><h5>ShopApp</h5><small>Admin Panel</small></div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-section-label">Main</div>
+        <a href="#" class="nav-link active" data-section="dashboard"><i class="fas fa-chart-pie"></i> Dashboard</a>
+        <a href="#" class="nav-link" data-section="approval"><i class="fas fa-user-check"></i> User Approval <span id="pending-badge" style="margin-left:auto;background:var(--danger);color:white;padding:1px 7px;border-radius:10px;font-size:0.68rem;font-weight:700;"></span></a>
+        <a href="#" class="nav-link" data-section="users"><i class="fas fa-users"></i> All Users</a>
+        <a href="#" class="nav-link" data-section="analytics"><i class="fas fa-chart-line"></i> Analytics</a>
+        <a href="#" class="nav-link" data-section="expiring"><i class="fas fa-clock"></i> Expiring Soon</a>
+        <div class="nav-section-label mt-3">Settings</div>
+        <a href="#" class="nav-link" data-section="saas"><i class="fas fa-cogs"></i> Plan Config</a>
+        <a href="#" class="nav-link" data-section="coupons"><i class="fas fa-ticket-alt"></i> Coupons</a>
+        <div class="nav-section-label mt-3">System</div>
+        <a href="index.html" class="nav-link"><i class="fas fa-store"></i> Back to App</a>
+    </nav>
+    <div class="sidebar-footer">
+        <div class="admin-badge">
+            <div class="admin-avatar"><i class="fas fa-user-shield"></i></div>
+            <div>
+                <div style="font-size:0.82rem;font-weight:600;">Super Admin</div>
+                <div style="font-size:0.7rem;color:var(--text-muted);">admin@shop.com</div>
+            </div>
+        </div>
+    </div>
+</aside>
+
+<!-- MAIN -->
+<div class="admin-main">
+    <header class="admin-topbar">
+        <div style="display:flex;align-items:center;gap:12px;">
+            <button class="hamburger" id="hamburger-btn"><i class="fas fa-bars"></i></button>
+            <h4 id="topbar-title">Dashboard</h4>
+        </div>
+        <div class="topbar-actions">
+            <button class="btn-refresh" id="refresh-btn"><i class="fas fa-sync-alt"></i> <span class="hide-mobile">Refresh</span></button>
+            <button class="btn-logout" onclick="adminLogout()"><i class="fas fa-sign-out-alt"></i> <span class="hide-mobile">Logout</span></button>
+        </div>
+    </header>
+
+    <div class="admin-content">
+
+        <!-- DASHBOARD -->
+        <section id="section-dashboard" class="admin-section-view">
+            <div class="stat-grid">
+                <div class="stat-card primary">
+                    <div class="stat-icon primary"><i class="fas fa-users"></i></div>
+                    <div class="stat-value" id="stat-total">—</div>
+                    <div class="stat-label">Total Users</div>
+                </div>
+                <div class="stat-card" style="border-top-color:#ffd166;">
+                    <div class="stat-icon warning"><i class="fas fa-hourglass-half"></i></div>
+                    <div class="stat-value" id="stat-pending">—</div>
+                    <div class="stat-label">Pending Approval</div>
+                </div>
+                <div class="stat-card success">
+                    <div class="stat-icon success"><i class="fas fa-user-check"></i></div>
+                    <div class="stat-value" id="stat-approved">—</div>
+                    <div class="stat-label">Approved Users</div>
+                </div>
+                <div class="stat-card danger">
+                    <div class="stat-icon danger"><i class="fas fa-user-slash"></i></div>
+                    <div class="stat-value" id="stat-rejected">—</div>
+                    <div class="stat-label">Rejected Users</div>
+                </div>
+            </div>
+            <div class="stat-grid">
+                <div class="stat-card" style="border-top-color:#8b90b0;">
+                    <div class="stat-icon" style="background:rgba(139,144,176,0.1);color:#8b90b0;"><i class="fas fa-gift"></i></div>
+                    <div class="stat-value" id="stat-free">—</div>
+                    <div class="stat-label">Free Plan</div>
+                </div>
+                <div class="stat-card" style="border-top-color:#4cc9f0;">
+                    <div class="stat-icon" style="background:rgba(76,201,240,0.1);color:#4cc9f0;"><i class="fas fa-calendar-alt"></i></div>
+                    <div class="stat-value" id="stat-monthly">—</div>
+                    <div class="stat-label">Monthly Plan</div>
+                </div>
+                <div class="stat-card warning">
+                    <div class="stat-icon warning"><i class="fas fa-crown"></i></div>
+                    <div class="stat-value" id="stat-yearly">—</div>
+                    <div class="stat-label">Yearly Plan</div>
+                </div>
+                <div class="stat-card" style="border-top-color:#6c63ff;">
+                    <div class="stat-icon primary"><i class="fas fa-rupee-sign"></i></div>
+                    <div class="stat-value" id="stat-revenue">—</div>
+                    <div class="stat-label">Total Revenue</div>
+                </div>
+            </div>
+            <div class="admin-section">
+                <div class="section-header">
+                    <h6><i class="fas fa-clock"></i> Recent Signups</h6>
+                    <button class="btn-refresh" onclick="navigateTo('users')">View All <i class="fas fa-arrow-right ms-1"></i></button>
+                </div>
+                <div id="recent-users-wrap"><div class="spinner-wrap"><div class="spinner"></div><div>Loading...</div></div></div>
+            </div>
+        </section>
+
+        <!-- APPROVAL -->
+        <section id="section-approval" class="admin-section-view d-none">
+            <div style="display:flex;gap:8px;margin-bottom:14px;overflow-x:auto;padding-bottom:4px;">
+                <button class="approval-tab active" onclick="switchApprovalTab(this,'pending')">⏳ Pending <span id="pending-count" style="margin-left:4px;background:var(--danger);color:white;padding:1px 7px;border-radius:10px;font-size:0.7rem;font-weight:700;"></span></button>
+                <button class="approval-tab" onclick="switchApprovalTab(this,'approved')">✅ Approved <span id="approved-count" style="margin-left:4px;background:rgba(0,208,132,0.3);color:#00d084;padding:1px 7px;border-radius:10px;font-size:0.7rem;font-weight:700;"></span></button>
+                <button class="approval-tab" onclick="switchApprovalTab(this,'rejected')">❌ Rejected <span id="rejected-count" style="margin-left:4px;background:rgba(255,77,109,0.2);color:#ff4d6d;padding:1px 7px;border-radius:10px;font-size:0.7rem;font-weight:700;"></span></button>
+            </div>
+            <div class="admin-section">
+                <div id="pending-list"><div class="spinner-wrap"><div class="spinner"></div></div></div>
+                <div id="approved-list" class="d-none"></div>
+                <div id="rejected-list" class="d-none"></div>
+            </div>
+        </section>
+
+        <!-- ALL USERS -->
+        <section id="section-users" class="admin-section-view d-none">
+            <div class="admin-section">
+                <div class="section-header">
+                    <h6><i class="fas fa-users"></i> All Users <span id="user-count-badge" style="font-size:0.75rem;color:var(--text-muted);font-weight:500;"></span></h6>
+                    <div class="admin-search"><i class="fas fa-search"></i><input type="text" id="user-search" placeholder="Search name / email..."></div>
+                </div>
+                <div style="padding:12px 16px;border-bottom:1px solid var(--admin-border);">
+                    <div class="filter-pills">
+                        <button class="filter-pill active" data-filter="all">All</button>
+                        <button class="filter-pill" data-filter="pending">Pending</button>
+                        <button class="filter-pill" data-filter="approved">Approved</button>
+                        <button class="filter-pill" data-filter="rejected">Rejected</button>
+                        <button class="filter-pill" data-filter="premium">Paid Plans</button>
+                        <button class="filter-pill" data-filter="free">Free</button>
+                    </div>
+                </div>
+                <div class="scroll-hint"><i class="fas fa-arrows-left-right me-2"></i>Swipe horizontally to see more data →</div>
+                <div class="admin-table-wrap">
+                    <table class="admin-table">
+                        <thead><tr><th>User</th><th>Shop</th><th>Mobile</th><th>Plan</th><th>Plan End</th><th>Days</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead>
+                        <tbody id="users-table-body"><tr><td colspan="9"><div class="spinner-wrap"><div class="spinner"></div><div>Loading...</div></div></td></tr></tbody>
+                    </table>
+                </div>
+                <div class="user-cards-mobile" id="users-cards-mobile"></div>
+            </div>
+        </section>
+
+        <!-- ANALYTICS -->
+        <section id="section-analytics" class="admin-section-view d-none">
+            <div id="analytics-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:20px;">
+                <div class="spinner-wrap"><div class="spinner"></div></div>
+            </div>
+            
+            <!-- Graphical Charts Row -->
+            <div class="row g-4 mb-4">
+                <div class="col-12 col-xl-6">
+                    <div class="admin-section h-100">
+                        <div class="section-header"><h6><i class="fas fa-chart-pie"></i> Plan Distribution</h6></div>
+                        <div style="padding: 20px; min-height: 300px; position: relative;">
+                            <canvas id="planDistributionChart" style="width:100% !important; height:100% !important;"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-xl-6">
+                    <div class="admin-section h-100">
+                        <div class="section-header"><h6><i class="fas fa-chart-bar"></i> Revenue Breakdown</h6></div>
+                        <div style="padding: 20px; min-height: 300px; position: relative;">
+                            <canvas id="revenueBreakdownChart" style="width:100% !important; height:100% !important;"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="admin-section">
+                        <div class="section-header"><h6><i class="fas fa-chart-line"></i> User Growth</h6></div>
+                        <div style="padding: 20px; min-height: 250px; position: relative;">
+                            <canvas id="userGrowthChart" style="width:100% !important; height:100% !important;"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="admin-section">
+                <div class="section-header"><h6><i class="fas fa-list"></i> Users Plan Overview</h6></div>
+                <div id="user-plan-breakdown"><div class="spinner-wrap"><div class="spinner"></div></div></div>
+            </div>
+        </section>
+
+        <!-- EXPIRING -->
+        <section id="section-expiring" class="admin-section-view d-none">
+            <div class="admin-section">
+                <div class="section-header"><h6><i class="fas fa-clock"></i> Plans Expiring in ≤ 3 Days</h6></div>
+                <div id="expiring-users-wrap"><div class="spinner-wrap"><div class="spinner"></div><div>Loading...</div></div></div>
+            </div>
+        </section>
+
+        <!-- PLAN CONFIG -->
+        <section id="section-saas" class="admin-section-view d-none">
+            <div class="row g-4">
+                <div class="col-md-7">
+                    <div class="admin-section">
+                        <div class="section-header">
+                            <h6><i class="fas fa-tags"></i> Plan Management</h6>
+                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addPlanModal"><i class="fas fa-plus me-1"></i>New Plan</button>
+                        </div>
+                        <div class="scroll-hint"><i class="fas fa-arrows-left-right me-2"></i>Swipe horizontally to see more data →</div>
+                        <div class="admin-table-wrap" style="display: block !important;">
+                            <table class="admin-table">
+                                <thead><tr><th>Plan Name</th><th>Days</th><th>Price</th><th>Status</th><th>Action</th></tr></thead>
+                                <tbody id="plans-table-body">
+                                    <tr><td colspan="5"><div class="spinner-wrap"><div class="spinner"></div></div></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="user-cards-mobile" id="plans-mobile"></div>
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <div class="admin-section">
+                        <div class="section-header"><h6><i class="fas fa-crown"></i> Plan Distribution</h6></div>
+                        <div class="p-3">
+                            <div class="row g-3">
+                                <div class="col-6"><div style="background:var(--admin-surface);border:1px solid var(--admin-border);border-radius:14px;padding:18px;text-align:center;"><div style="font-size:1.8rem;margin-bottom:4px;">🎁</div><div id="free-count" style="font-size:1.6rem;font-weight:800;color:var(--text-muted);">—</div><div style="font-size:0.75rem;color:var(--text-muted);">Free Users</div></div></div>
+                                <div class="col-6"><div style="background:rgba(76,201,240,0.05);border:1px solid rgba(76,201,240,0.2);border-radius:14px;padding:18px;text-align:center;"><div style="font-size:1.8rem;margin-bottom:4px;">📅</div><div id="premium-count" style="font-size:1.6rem;font-weight:800;color:#4cc9f0;">—</div><div style="font-size:0.75rem;color:var(--text-muted);">Monthly Users</div></div></div>
+                                <div class="col-6"><div style="background:rgba(255,209,102,0.05);border:1px solid rgba(255,209,102,0.2);border-radius:14px;padding:18px;text-align:center;"><div style="font-size:1.8rem;margin-bottom:4px;">👑</div><div id="yearly-count" style="font-size:1.6rem;font-weight:800;color:var(--warning);">—</div><div style="font-size:0.75rem;color:var(--text-muted);">Yearly Users</div></div></div>
+                                <div class="col-6"><div style="background:rgba(0,208,132,0.05);border:1px solid rgba(0,208,132,0.2);border-radius:14px;padding:18px;text-align:center;"><div style="font-size:1.8rem;margin-bottom:4px;">💰</div><div id="revenue-count" style="font-size:1.6rem;font-weight:800;color:var(--success);">—</div><div style="font-size:0.75rem;color:var(--text-muted);">Total Revenue</div></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- COUPONS -->
+        <section id="section-coupons" class="admin-section-view d-none">
+            <div class="admin-section">
+                <div class="section-header">
+                    <h6><i class="fas fa-ticket-alt"></i> Discount Coupons</h6>
+                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addCouponModal"><i class="fas fa-plus me-1"></i>New Coupon</button>
+                </div>
+                <div class="admin-table-wrap">
+                    <table class="admin-table">
+                        <thead><tr><th>Code</th><th>Discount</th><th>Expiry</th><th>Usage</th><th>Action</th></tr></thead>
+                        <tbody id="coupons-table-body"><tr><td colspan="5"><div class="spinner-wrap"><div class="spinner"></div></div></td></tr></tbody>
+                    </table>
+                </div>
+                <div class="user-cards-mobile" id="coupons-mobile"></div>
+            </div>
+        </section>
+
+    </div><!-- /admin-content -->
+</div><!-- /admin-main -->
+</div><!-- /admin-panel-wrap -->
+
+    <!-- Add/Edit Plan Modal -->
+    <div class="modal fade" id="addPlanModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow rounded-4" style="background:var(--admin-card);color:var(--text-primary);">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold" id="planModalTitle">Create New Plan</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" style="filter:invert(1);"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="add-plan-form">
+                        <input type="hidden" id="plan-id">
+                        <div class="mb-3">
+                            <label class="form-label">Plan Name</label>
+                            <input type="text" id="plan-name" class="admin-input" placeholder="e.g. Starter Monthly" required>
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label">Duration (Days)</label>
+                                <input type="number" id="plan-days" class="admin-input" placeholder="30" required>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Price (₹)</label>
+                                <input type="number" id="plan-price" class="admin-input" placeholder="299" required>
+                            </div>
+                        </div>
+                        <div class="mb-4 d-flex align-items-center gap-2">
+                            <input type="checkbox" id="plan-active" checked style="width:18px;height:18px;accent-color:var(--primary);">
+                            <label for="plan-active" class="mb-0" style="font-size:0.9rem;font-weight:600;">Plan is Active</label>
+                        </div>
+                        <button type="submit" class="btn-login" id="planBtnText">Create Plan</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- Add Coupon Modal -->
+<div class="modal fade" id="addCouponModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content shadow-lg rounded-4" style="background:var(--admin-surface);border:1px solid var(--admin-border);">
+            <div class="modal-header" style="border-color:var(--admin-border);">
+                <h6 class="modal-title fw-bold">Create New Coupon</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="add-coupon-form">
+                    <div class="mb-3">
+                        <label class="form-label">Coupon Code</label>
+                        <div style="display:flex;gap:6px;">
+                            <input type="text" id="cpn-code" class="admin-input" placeholder="SAVE50" required style="font-weight:700;letter-spacing:1px;text-transform:uppercase;">
+                            <button type="button" onclick="generateCouponCode()" title="Generate" style="background:rgba(108,99,255,0.15);border:1px solid rgba(108,99,255,0.3);color:var(--primary);border-radius:12px;padding:0 14px;font-size:1rem;cursor:pointer;flex-shrink:0;transition:all 0.2s;min-height:44px;">🎲</button>
+                            <button type="button" id="cpn-copy-btn" onclick="copyCouponCode()" title="Copy" style="background:rgba(0,208,132,0.12);border:1px solid rgba(0,208,132,0.25);color:#00d084;border-radius:12px;padding:0 14px;font-size:0.9rem;cursor:pointer;flex-shrink:0;transition:all 0.2s;min-height:44px;">📋</button>
+                        </div>
+                        <div id="cpn-copy-msg" style="display:none;font-size:0.72rem;color:#00d084;margin-top:4px;font-weight:600;">✅ Code copied!</div>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-7">
+                            <label class="form-label">Discount Value</label>
+                            <input type="number" id="cpn-value" class="admin-input" placeholder="20" required>
+                        </div>
+                        <div class="col-5">
+                            <label class="form-label">Type</label>
+                            <select id="cpn-type" class="admin-input" style="padding:10px 12px;min-height:44px;">
+                                <option value="percent">% Off</option>
+                                <option value="flat">₹ Flat</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Valid Till</label>
+                        <input type="date" id="cpn-expiry" class="admin-input" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label">Max Usage (optional)</label>
+                        <input type="number" id="cpn-max" class="admin-input" placeholder="100">
+                    </div>
+                    <button type="submit" class="btn-login">Create Coupon</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div id="admin-toast"></div>
+
+<!-- Android Bottom Nav -->
+<nav class="admin-bottom-nav" id="admin-bottom-nav">
+    <button class="bottom-nav-item active" data-section="dashboard" onclick="bottomNav(this,'dashboard')">
+        <i class="fas fa-chart-pie"></i><span>Home</span><span class="nav-dot"></span>
+    </button>
+    <button class="bottom-nav-item" data-section="approval" onclick="bottomNav(this,'approval')">
+        <i class="fas fa-user-check"></i><span>Orders</span><span class="nav-dot"></span>
+    </button>
+    <button class="bottom-nav-item" data-section="users" onclick="bottomNav(this,'users')">
+        <i class="fas fa-users"></i><span>Users</span><span class="nav-dot"></span>
+    </button>
+    <button class="bottom-nav-item" data-section="analytics" onclick="bottomNav(this,'analytics')">
+        <i class="fas fa-chart-line"></i><span>Stats</span><span class="nav-dot"></span>
+    </button>
+    <button class="bottom-nav-item" data-section="saas" onclick="bottomNav(this,'saas')">
+        <i class="fas fa-cogs"></i><span>Setup</span><span class="nav-dot"></span>
+    </button>
+</nav>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script>
+function bottomNav(btn, section) {
+    document.querySelectorAll('.bottom-nav-item').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    navigateTo(section);
+}
+function syncBottomNav(section) {
+    document.querySelectorAll('.bottom-nav-item').forEach(b => {
+        b.classList.toggle('active', b.dataset.section === section);
+    });
+}
+function switchApprovalTab(btn, type) {
+    document.querySelectorAll('.approval-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    ['pending-list','approved-list','rejected-list'].forEach(id => {
+        document.getElementById(id).classList.add('d-none');
+    });
+    document.getElementById(type + '-list').classList.remove('d-none');
+}
+</script>
+<script src="admin.js"></script>
+<script>
+const _origNavTo = navigateTo;
+window.navigateTo = function(section) {
+    if (typeof _origNavTo === 'function') _origNavTo(section);
+    syncBottomNav(section);
+    // If navigating to analytics, refresh charts to ensure they render in visible container
+    if (section === 'analytics' && typeof renderStats === 'function') {
+        renderStats();
+    }
+};
+const _origRS = renderStats;
+window.renderStats = function() {
+    if (typeof _origRS === 'function') _origRS();
+    const monthly = allUsers.filter(u => (u.plan || u.subscriptionPlan || '') === 'monthly').length;
+    const yearly  = allUsers.filter(u => (u.plan || u.subscriptionPlan || '') === 'yearly').length;
+    const rev     = allUsers.reduce((s, u) => s + parseFloat(u.amountPaid || u.pricePaid || 0), 0);
+    const el = id => document.getElementById(id);
+    if (el('yearly-count'))  el('yearly-count').textContent  = yearly;
+    if (el('revenue-count')) el('revenue-count').textContent = '₹' + rev.toFixed(0);
+    const pending = allUsers.filter(u => (u.status || 'pending') === 'pending').length;
+    const pb = document.getElementById('pending-badge');
+    if (pb) pb.textContent = pending > 0 ? pending : '';
+    const appBtn = document.querySelector('.bottom-nav-item[data-section="approval"] i');
+    if (appBtn) appBtn.style.color = pending > 0 ? 'var(--danger)' : '';
+};
+</script>
+</body>
+</html>

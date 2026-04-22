@@ -15,8 +15,25 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Razorpay SDK -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <!-- Custom CSS -->
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* Minimal subscription plan card styles (mobile-first) */
+        .plan-cards-grid { display:flex; gap:12px; overflow:auto; padding-bottom:6px; }
+        .plan-card-item { flex: 0 0 100%; min-width:100%; background:#fff; color:#1a1d2e; border-radius:14px; padding:14px; box-shadow:0 6px 18px rgba(0,0,0,0.06); }
+        .plan-card-item.active-plan { border:2px solid #4361ee; box-shadow:0 8px 26px rgba(67,97,238,0.12); }
+        .plan-card-icon{font-size:1.6rem;display:block;margin-bottom:6px}
+        .plan-card-name{font-weight:800;font-size:1rem}
+        .plan-card-price{font-weight:900;font-size:1.4rem;margin-top:6px}
+        .plan-card-duration{font-size:0.82rem;color:#6b7280}
+        .plan-card-btn{margin-top:10px;background:linear-gradient(135deg,#4361ee,#3f37c9);color:#fff;border:none;padding:8px 12px;border-radius:10px;font-weight:800;min-height:44px}
+        .plan-active-label{margin-top:8px;color:#10b981;font-weight:800}
+        @media(min-width:768px){ .plan-cards-grid{flex-wrap:wrap} .plan-card-item{flex:1 1 calc(33.333% - 16px); min-width:0} }
+        .plan-card-name,.plan-card-price{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .plan-status-bar .plan-dates div{margin-bottom:6px}
+    </style>
 </head>
 
 <body>
@@ -90,6 +107,21 @@
         </div>
     </section>
 
+    <!-- Subscription Expired Overlay -->
+    <section id="expired-overlay" class="d-none">
+        <div class="expired-card glass-panel animate__animated animate__fadeIn">
+            <div class="text-center">
+                <div class="lock-icon mb-4"><i class="fas fa-lock text-danger"></i></div>
+                <h2 class="fw-bold mb-3" data-i18n="plan_expired">Your plan has expired.</h2>
+                <p class="text-muted mb-4">Please renew your subscription to continue managing your shop seamlessly.</p>
+                <button class="btn btn-primary btn-lg custom-btn px-5" onclick="openUpgradeUI()" data-i18n="upgrade_now">Upgrade Now</button>
+                <div class="mt-4">
+                    <button class="btn btn-link text-muted" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i> <span data-i18n="logout">Logout</span></button>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- App Section -->
     <section id="app-section" class="d-none">
 
@@ -149,6 +181,9 @@
                     <span class="welcome-text text-muted"><span data-i18n="welcome">Welcome,</span> <strong
                             id="display-user-name" class="text-dark">User</strong></span>
                     <div class="avatar"><i class="fas fa-user"></i></div>
+                    <button id="header-logout-btn" class="btn btn-outline-danger btn-sm rounded-circle d-md-none" style="width:38px;height:38px;display:flex;align-items:center;justify-content:center;" title="Logout">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
                 </div>
             </header>
 
@@ -157,6 +192,14 @@
 
                 <!-- Dashboard View -->
                 <div id="view-dashboard" class="app-view active">
+
+                    <!-- ====== PLAN SECTION ====== -->
+                    <div class="mx-auto mt-3 mb-4" style="max-width:800px;">
+                        <div id="subscription-ui-wrap" style="font-family:'Outfit',sans-serif;">
+                            <!-- Rendered by loadSubscriptionUI() -->
+                        </div>
+                    </div>
+
                     <div class="row g-3 mb-4 stat-cards-row">
                         <div class="col-6 col-md-3">
                             <div class="stat-card p-3 glass-panel gradient-card-1">
@@ -312,11 +355,15 @@
                             <div class="card border-0 shadow-sm rounded-4">
                                 <div class="card-body p-3">
                                     <h5 class="fw-bold mb-3" data-i18n="add_to_cart">Add to Cart</h5>
-                                    <div class="input-group mb-3 search-group shadow-sm">
-                                        <span class="input-group-text bg-white border-0"><i
-                                                class="fas fa-search text-muted"></i></span>
-                                        <input type="text" id="billing-search" class="form-control border-0"
-                                            data-i18n-ph="search_product" placeholder="Search by product name...">
+                                    <div class="d-flex gap-2 mb-3">
+                                        <div class="input-group search-group shadow-sm flex-grow-1">
+                                            <span class="input-group-text bg-white border-0"><i class="fas fa-search text-muted"></i></span>
+                                            <input type="text" id="billing-search" class="form-control border-0"
+                                                data-i18n-ph="search_product" placeholder="Search by product name...">
+                                        </div>
+                                        <select id="billing-rack-filter" class="form-select border-0 shadow-sm" style="max-width:130px;border-radius:12px;font-size:0.85rem;font-weight:600;cursor:pointer;" onchange="applyBillingFilters()">
+                                            <option value="">🗂️ All Racks</option>
+                                        </select>
                                     </div>
                                     <div class="billing-product-grid" id="billing-products-grid">
                                         <!-- Products available to add -->
@@ -507,18 +554,78 @@
                                 Profile Config</button>
                         </form>
                     </div>
-
-                    <!-- ── Subscription Section ── -->
-                    <div class="mx-auto mt-3" style="max-width:600px;">
-                        <div id="subscription-ui-wrap" style="color:#eef0fb;font-family:'Outfit',sans-serif;">
-                            <!-- Rendered by loadSubscriptionUI() -->
-                        </div>
-                    </div>
                 </div>
 
             </div>
         </main>
     </section>
+
+    <!-- ============================================================ -->
+    <!-- NO PLAN OVERLAY                                              -->
+    <!-- ============================================================ -->
+    <div id="no-plan-overlay" class="d-none" style="position:fixed;inset:0;background:rgba(10,10,30,0.92);z-index:8000;align-items:center;justify-content:center;padding:20px;">
+        <div class="no-plan-card" style="background:#fff;border-radius:24px;padding:36px 28px;max-width:420px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+            <div style="font-size:3.5rem;margin-bottom:12px;">🚀</div>
+            <h4 style="font-weight:800;color:#1a1d2e;margin-bottom:8px;">Select a Plan to Continue</h4>
+            <p style="color:#64748b;margin-bottom:24px;font-size:0.92rem;">Please choose a subscription plan to access all features of your shop.</p>
+            <button onclick="closePlanOverlay()" class="btn btn-primary w-100" style="border-radius:12px;min-height:48px;font-weight:700;background:linear-gradient(135deg,#4361ee,#3f37c9);border:none;">
+                View Plans
+            </button>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- PLAN CHECKOUT MODAL                                          -->
+    <!-- ============================================================ -->
+    <div class="modal fade" id="planCheckoutModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-header border-0 pb-0 px-4 pt-4">
+                    <div>
+                        <h5 class="fw-bold mb-0" id="checkout-modal-title">Subscribe</h5>
+                        <p class="text-muted small mb-0" id="checkout-modal-subtitle">Activate your plan</p>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" onclick="appliedCoupon=null;"></button>
+                </div>
+                <div class="modal-body px-4 pb-4">
+                    <!-- Price Display -->
+                    <div class="plan-checkout-price-box mb-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted">Plan Price</span>
+                            <span class="fw-bold fs-5" id="checkout-base-price">₹0</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-2" id="checkout-discount-row" style="display:none!important;">
+                            <span class="text-success small">Coupon Discount</span>
+                            <span class="text-success fw-bold" id="checkout-discount-amt">-₹0</span>
+                        </div>
+                        <hr class="my-2">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fw-bold">Final Amount</span>
+                            <span class="fw-bold fs-4 text-primary" id="checkout-final-price">₹0</span>
+                        </div>
+                    </div>
+
+                    <!-- Coupon -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold small text-muted mb-2">🎟️ Have a Coupon? (Optional)</label>
+                        <div class="input-group">
+                            <input type="text" id="plan-coupon-input" class="form-control" placeholder="Enter coupon code" style="text-transform:uppercase;border-radius:10px 0 0 10px!important;">
+                            <button class="btn btn-outline-primary fw-bold" id="plan-coupon-btn" onclick="validatePlanCoupon()" style="border-radius:0 10px 10px 0!important;">Apply</button>
+                        </div>
+                        <div id="plan-coupon-status" class="mt-2 small"></div>
+                    </div>
+
+                    <!-- Pay Button -->
+                    <button class="btn btn-primary w-100 fw-bold" id="plan-pay-btn" onclick="initPlanRazorpay()" style="min-height:52px;font-size:1.05rem;border-radius:14px;background:linear-gradient(135deg,#4361ee,#3f37c9);border:none;">
+                        <i class="fas fa-lock me-2"></i>Pay Now
+                    </button>
+                    <p class="text-muted text-center small mt-2 mb-0">
+                        <i class="fas fa-shield-alt me-1"></i>Secure payment via Razorpay
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Modals -->
 
@@ -785,7 +892,10 @@
 
     <!-- ====== BOTTOM NAVIGATION (Mobile Only) ====== -->
     <nav class="bottom-nav" id="bottom-nav" role="navigation" aria-label="Bottom navigation">
-        <div class="bottom-nav-inner">
+        <div class="bottom-nav-gradient left"></div>
+        <div class="bottom-nav-gradient right"></div>
+        <div class="bottom-nav-swipe-hint" id="nav-swipe-hint">← swipe →</div>
+        <div class="bottom-nav-inner" id="bottom-nav-inner">
             <button class="bottom-nav-item active" data-target="dashboard" aria-label="Dashboard">
                 <i class="fas fa-home"></i>
                 <span data-i18n="dashboard">Dashboard</span>
@@ -798,17 +908,21 @@
                 <i class="fas fa-file-invoice-dollar"></i>
                 <span data-i18n="billing">Billing</span>
             </button>
-            <button class="bottom-nav-item" data-target="udhaar" aria-label="Udhaar">
+            <button class="bottom-nav-item" data-target="analytics" aria-label="Analytics">
+                <i class="fas fa-chart-line"></i>
+                <span data-i18n="analytics">Analytics</span>
+            </button>
+            <button class="bottom-nav-item" data-target="udhaar" aria-label="Udhaar Book">
                 <i class="fas fa-book"></i>
-                <span data-i18n="udhaar_book">Udhaar</span>
+                <span data-i18n="udhaar_book">Udhaar Book</span>
             </button>
-            <button class="bottom-nav-item" data-target="profile" aria-label="Profile">
+            <button class="bottom-nav-item" data-target="profile" aria-label="Edit Profile">
                 <i class="fas fa-user-cog"></i>
-                <span data-i18n="edit_profile">Profile</span>
+                <span data-i18n="edit_profile">Edit Profile</span>
             </button>
-            <button class="bottom-nav-item" id="mobile-logout-btn" aria-label="Logout" style="color: #e74c3c;">
-                <i class="fas fa-sign-out-alt"></i>
-                <span>Logout</span>
+            <button class="bottom-nav-item d-none" id="mobile-admin-btn" data-target="admin" aria-label="Admin Panel">
+                <i class="fas fa-shield-alt text-primary"></i>
+                <span style="color: var(--primary-color); font-weight:700;">Admin</span>
             </button>
         </div>
     </nav>
