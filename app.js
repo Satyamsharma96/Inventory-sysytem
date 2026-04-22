@@ -358,6 +358,11 @@ document.getElementById('login-form').addEventListener('submit', async e => {
             // ─────────────────────────────────────────────────
 
             if (fbUser.password === password) {
+                if (email === "admin@shop.com") {
+                    sessionStorage.setItem("admin_auth", "true");
+                    window.location.href = "admin.html";
+                    return;
+                }
                 currentUser = fbUser;
                 saveCurrentUser();
                 showApp();
@@ -390,6 +395,7 @@ function doLogout() {
     removeFirebaseListeners();
     cart = [];
     selectedPaymentMethod = null;
+    sessionStorage.removeItem("admin_auth");
     showAuth();
 }
 

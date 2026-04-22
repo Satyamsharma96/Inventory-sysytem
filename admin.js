@@ -55,16 +55,34 @@ function showToast(msg, type = 'success') {
     setTimeout(() => { t.style.display = 'none'; }, 3500);
 }
 
-// ── Initial Check: Is Admin Logged In? ────────────
+const isAdmin = sessionStorage.getItem('admin_auth');
+if (!isAdmin) {
+    window.location.href = 'index.html';
+}
+
 window.addEventListener('DOMContentLoaded', () => {
-    const stored = sessionStorage.getItem('admin_auth');
-    if (stored === 'true') {
+    if (isAdmin) {
         showAdminPanel();
-    } else {
-        // If not authenticated, show login screen on this page instead of redirecting
-        showLoginScreen();
     }
-    setupEventListeners();
+    if (typeof setupEventListeners === 'function') setupEventListeners();
+
+    // MOBILE SIDEBAR TOGGLE LOGIC
+    const menuBtn = document.getElementById("menuToggle");
+    const sidebar = document.getElementById("sidebar");
+    
+    if (menuBtn && sidebar) {
+        menuBtn.addEventListener("click", (e) => {
+            e.stopPropagation(); // Prevent immediate document click
+            sidebar.classList.toggle("active");
+        });
+
+        // Close sidebar when clicking outside
+        document.addEventListener("click", (e) => {
+            if (sidebar.classList.contains("active") && !sidebar.contains(e.target) && e.target !== menuBtn) {
+                sidebar.classList.remove("active");
+            }
+        });
+    }
 });
 
 // ── Show Login Screen ─────────────────────────────
@@ -77,7 +95,7 @@ function showLoginScreen() {
 function showAdminPanel() {
     isLoggedIn = true;
     document.getElementById('admin-login-screen').style.display = 'none';
-    document.getElementById('admin-panel-wrap').style.display   = 'flex';
+    document.getElementById('admin-panel-wrap').style.display   = 'block';
     loadAllData();
 }
 
@@ -103,7 +121,7 @@ function adminLogout() {
     // Clear any user session from app.js just in case
     localStorage.removeItem('currentUser');
     isLoggedIn = false;
-    showLoginScreen();
+    window.location.href = 'index.html';
 }
 
 // ── Load All Data ─────────────────────────────────
@@ -377,7 +395,7 @@ function renderUserPlanBreakdown() {
 
     wrap.innerHTML = `
         <div class="scroll-hint"><i class="fas fa-arrows-left-right me-2"></i>Swipe horizontally to see more data →</div>
-        <div class="admin-table-wrap">
+        <div class="admin-table-wrap table-responsive">
             <table class="admin-table">
                 <thead><tr>
                     <th>User</th><th>Plan</th><th>Paid</th><th>Expires</th><th>Days Left</th>
@@ -403,7 +421,7 @@ function renderRecentUsers() {
 
     wrap.innerHTML = `
         <div class="scroll-hint"><i class="fas fa-arrows-left-right me-2"></i>Swipe horizontally to see more data →</div>
-        <div class="admin-table-wrap">
+        <div class="admin-table-wrap table-responsive">
             <table class="admin-table">
                 <thead><tr><th>User</th><th>Shop</th><th>Status</th><th>Plan</th><th>Joined</th><th>Action</th></tr></thead>
                 <tbody>${recent.map(u => buildUserRow(u)).join('')}</tbody>
@@ -428,7 +446,7 @@ function renderExpiringUsers() {
 
     wrap.innerHTML = `
         <div class="scroll-hint"><i class="fas fa-arrows-left-right me-2"></i>Swipe horizontally to see more data →</div>
-        <div class="admin-table-wrap">
+        <div class="admin-table-wrap table-responsive">
             <table class="admin-table">
                 <thead><tr><th>User</th><th>Plan</th><th>Expires</th><th>Days Left</th><th>Action</th></tr></thead>
                 <tbody>${expiring.map(u => {

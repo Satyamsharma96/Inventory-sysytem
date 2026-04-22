@@ -270,11 +270,82 @@
         }
 
 
-        /* DESKTOP DEFAULTS */
         @media (min-width: 1200px) {
             .user-cards-mobile { display: none; }
             .admin-table-wrap { display: block !important; }
             .admin-bottom-nav { display: none; }
+        }
+
+        /* NEW SIDEBAR CSS FIX */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed !important;
+                left: -250px !important;
+                top: 0 !important;
+                width: 250px !important;
+                height: 100% !important;
+                background: #111 !important;
+                transition: 0.3s !important;
+                z-index: 1000 !important;
+                transform: none !important;
+            }
+            .sidebar.active {
+                left: 0 !important;
+            }
+            #menuToggle {
+                display: block;
+                font-size: 24px;
+                cursor: pointer;
+                background: none;
+                border: none;
+                color: white;
+            }
+        }
+        @media (min-width: 769px) {
+            #menuToggle {
+                display: none;
+            }
+        }
+
+        /* --- RESPONSIVE FIXES (AS REQUESTED) --- */
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        * {
+            box-sizing: border-box;
+        }
+        .container, .main-content {
+            width: 100%;
+            overflow-x: hidden;
+        }
+        .table td, .table th, .admin-table td, .admin-table th {
+            white-space: nowrap;
+        }
+        .nav, .menu {
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        @media (max-width: 768px) {
+            .grid, .row {
+                display: flex !important;
+                flex-direction: column !important;
+            }
+            button:not(.hamburger):not(#menuToggle):not(.bottom-nav-item):not(.action-btn):not(.btn-refresh):not(.btn-logout):not(.filter-pill):not(.btn-close):not(.approval-tab), 
+            input, select {
+                width: 100%;
+                min-height: 44px;
+            }
+            
+            /* Prevent critical action texts from vanishing while preserving SPA routing (.d-none untouched) */
+            .hide-mobile { 
+                display: inline-block !important; 
+            }
+            
+            .sidebar-nav, .nav, .menu {
+                overflow-x: auto !important;
+                white-space: nowrap !important;
+            }
         }
     </style>
 </head>
@@ -302,7 +373,7 @@
 <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
 <!-- SIDEBAR -->
-<aside class="admin-sidebar" id="admin-sidebar">
+<aside class="admin-sidebar sidebar" id="sidebar">
     <div class="sidebar-logo">
         <div class="logo-icon"><i class="fas fa-shield-alt"></i></div>
         <div><h5>ShopApp</h5><small>Admin Panel</small></div>
@@ -335,7 +406,7 @@
 <div class="admin-main">
     <header class="admin-topbar">
         <div style="display:flex;align-items:center;gap:12px;">
-            <button class="hamburger" id="hamburger-btn"><i class="fas fa-bars"></i></button>
+            <button id="menuToggle">☰</button>
             <h4 id="topbar-title">Dashboard</h4>
         </div>
         <div class="topbar-actions">
@@ -433,7 +504,7 @@
                     </div>
                 </div>
                 <div class="scroll-hint"><i class="fas fa-arrows-left-right me-2"></i>Swipe horizontally to see more data →</div>
-                <div class="admin-table-wrap">
+                <div class="admin-table-wrap table-responsive">
                     <table class="admin-table">
                         <thead><tr><th>User</th><th>Shop</th><th>Mobile</th><th>Plan</th><th>Plan End</th><th>Days</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead>
                         <tbody id="users-table-body"><tr><td colspan="9"><div class="spinner-wrap"><div class="spinner"></div><div>Loading...</div></div></td></tr></tbody>
@@ -501,7 +572,7 @@
                             <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addPlanModal"><i class="fas fa-plus me-1"></i>New Plan</button>
                         </div>
                         <div class="scroll-hint"><i class="fas fa-arrows-left-right me-2"></i>Swipe horizontally to see more data →</div>
-                        <div class="admin-table-wrap" style="display: block !important;">
+                        <div class="admin-table-wrap table-responsive" style="display: block !important;">
                             <table class="admin-table">
                                 <thead><tr><th>Plan Name</th><th>Days</th><th>Price</th><th>Status</th><th>Action</th></tr></thead>
                                 <tbody id="plans-table-body">
@@ -535,7 +606,7 @@
                     <h6><i class="fas fa-ticket-alt"></i> Discount Coupons</h6>
                     <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addCouponModal"><i class="fas fa-plus me-1"></i>New Coupon</button>
                 </div>
-                <div class="admin-table-wrap">
+                <div class="admin-table-wrap table-responsive">
                     <table class="admin-table">
                         <thead><tr><th>Code</th><th>Discount</th><th>Expiry</th><th>Usage</th><th>Action</th></tr></thead>
                         <tbody id="coupons-table-body"><tr><td colspan="5"><div class="spinner-wrap"><div class="spinner"></div></div></td></tr></tbody>
